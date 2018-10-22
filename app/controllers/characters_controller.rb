@@ -10,12 +10,19 @@ class CharactersController < ApplicationController
   # GET /characters/1.json
   def show
     key = params[:key]
+    channel = params[:channel]
     if (key != "goodkeysosecure")
       render plain: "no good"
       return
     end
+
+    if (channel != "IvyTeapot" && channel != "thorsus")
+      render plain: "nope"
+      return
+    end
+
     @elements = ["Fire", "Wind", "Water", "Earth", "Heart", "Ice", "Void", "Lightning",
-      "Spike", "Life", "Molten", "Storm"]
+      "Spike", "Life", "Molten", "Storm", "Hug", "Tea", "Stream"]
     @modifiers = ["shot", "siphon", "wave", "wall", "bounce", "beam", "knife", "sword", "hammer",
       "strike", "punch", "kick", "spin"]
     @clazz = ["Tank", "Wizard", "Rogue", "Priest", "Cleric", "Ranger", "Warrior", "Sorceror",
