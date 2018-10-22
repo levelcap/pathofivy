@@ -9,6 +9,11 @@ class CharactersController < ApplicationController
   # GET /characters/1
   # GET /characters/1.json
   def show
+    key = params[:key]
+    if (key != "goodkeysosecure")
+      render plain: "no good"
+      return
+    end
     @elements = ["Fire", "Wind", "Water", "Earth", "Heart", "Ice", "Void", "Lightning",
       "Spike", "Life", "Molten", "Storm"]
     @modifiers = ["shot", "siphon", "wave", "wall", "bounce", "beam", "knife", "sword", "hammer",
@@ -42,7 +47,7 @@ class CharactersController < ApplicationController
       ## Lets go on an adventure and level up!
       @character.level = @character.level + 1
       @character.save
-      adventure = "#{@character.name} went forth and #{@actions.sample} "\
+      adventure = "#{@character.name} the #{@character.build} went forth and #{@actions.sample} "\
        "a #{@elements.sample}#{@monsterPart.sample} #{@monsterType.sample}. "\
        "They are now level #{@character.level.to_s}!"
       render plain: adventure
