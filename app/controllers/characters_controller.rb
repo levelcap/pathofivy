@@ -54,7 +54,7 @@ class CharactersController < ApplicationController
       if !@character.last_quest_date.nil?
         minutesSinceLQ = minutesSince(@character.last_quest_date)
         if (minutesSinceLQ < 30)
-          render :nothing => true, :status => :service_unavailable
+          render :nothing => true
           return
         end
       end
