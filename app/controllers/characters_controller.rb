@@ -51,13 +51,26 @@ class CharactersController < ApplicationController
       @character.save
       render plain: "#{@character.name} - a level 1 #{@character.build} - has started to walk the Path of Ivy!"
     else
+      if !@character.last_quest_date.nil?
+        minutesSinceLQ = minutesSince(@character.last_quest_date)
+        if (minutesSinceLQ < 30)
+          render :nothing => true, :status => :service_unavailable
+          return
+        end
+      end
       ## Lets go on an adventure and level up!
       @character.level = @character.level + 1
+      @character.last_quest_date = DateTime.now
       @character.save
       adventure = "#{@character.name} the #{@character.build} went forth and #{@actions.sample} "\
        "a #{@elements.sample}#{@monsterPart.sample} #{@monsterType.sample}. "\
        "They are now level #{@character.level.to_s}!"
       render plain: adventure
     end
+  end
+
+  private
+  def minutesSince(date)
+    return ((date - DateTime.now) / 60).abs.round
   end
 end
