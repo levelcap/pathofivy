@@ -16,7 +16,7 @@ class CharactersController < ApplicationController
       return
     end
 
-    if (channel != "ivyteapo" && channel != "thorsus")
+    if (channel != "ivyteapot" && channel != "thorsus")
       render plain: "nope"
       return
     end
