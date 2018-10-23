@@ -2,13 +2,16 @@
 class CharactersController < ApplicationController
   @@elements = ["Fire", "Wind", "Water", "Earth", "Heart", "Ice", "Void", "Lightning",
     "Spike", "Life", "Molten", "Storm", "Hug", "Tea", "Stream", "Gravel",
-    "Death", "Star", "Sun", "Moon", "Night", "Day"]
+    "Death", "Star", "Sun", "Moon", "Night", "Day", "Posion", "Exploding",
+    "Curse", "Blood", "Corpse", "Friendship", "Love", "Hate"]
 
   @@modifiers = ["shot", "siphon", "wave", "wall", "bounce", "beam", "knife", "sword", "hammer",
-    "strike", "punch", "kick", "spin", "squidge", "drain", "blast", "mace", "spear", "slap"]
+    "strike", "punch", "kick", "spin", "squidge", "drain", "blast", "mace", "spear", "slap", "pen",
+    "explosion", "cannon", "sip"]
 
   @@clazz = ["Tank", "Wizard", "Rogue", "Priest", "Cleric", "Ranger", "Warrior", "Sorceror",
-    "Witch", "Barbarian", "Cultist", "Banker", "Investigator", "NPC", "Warlock"]
+    "Witch", "Barbarian", "Cultist", "Banker", "Investigator", "NPC", "Warlock", "Bard", "Poet",
+    "Reporter"]
 
   @@actions = ["blasted", "fought", "smashed", "smooched", "befriended",
     "hugged", "obliterated", "did dirty", "offed", "chatted up", "stabbed", "knifed"]
