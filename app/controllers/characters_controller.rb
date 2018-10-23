@@ -79,7 +79,7 @@ class CharactersController < ApplicationController
         boss.health = health;
         if (health <= 0)
           render plain: "#{boss.name} is bleeding all over the Path of Ivy. "\
-            "#{@character.name} #{@@actions.sample}} #{boss.name} for #{damage} damage, killing it dead!"
+            "#{@character.name} #{@@actions.sample} #{boss.name} for #{damage} damage, killing it dead!"
             boss.active = false;
         else
           render plain: "#{boss.description} named #{boss.name} is RUINING the Path of Ivy for everyone. "\
