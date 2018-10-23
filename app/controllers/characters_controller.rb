@@ -67,9 +67,42 @@ class CharactersController < ApplicationController
           return
         end
       end
-      ## Lets go on an adventure and level up!
-      @character.level = @character.level + 1
+
       @character.last_quest_date = DateTime.now
+      @character.save
+
+      ## Is there a boss active?
+      boss = Boss.find_by(active: true)
+      unless boss.nil?
+        damage = (rand @character.level) + 1
+        health = boss.health - damage
+        boss.health = health;
+        if (health <= 0)
+          render plain: "#{boss.name} is bleeding all over the Path of Ivy. "\
+            "#{@character.name} #{@@actions.sample}} #{boss.name} for #{damage} damage, killing it dead!"
+            boss.active = false;
+        else
+          render plain: "#{boss.description} named #{boss.name} is RUINING the Path of Ivy for everyone. "\
+            "#{@character.name} #{@@actions.sample} #{boss.name} for #{damage} damage, bringing it to #{health} life."
+        end
+        boss.save
+        return
+      end
+
+      ## Did we spawn a boss?
+      roll_for_boss = rand 20
+      if (roll_for_boss == 0)
+        boss = Boss.where(active: false).sample
+        boss.health = @character.level * ((rand 5) + 2)
+        boss.active = true
+        boss.save
+        render plain: "#{boss.description} appears on the Path of Ivy causing #{@character.name} to reel back in horror! "\
+            "This is the beast known as #{boss.name} and it will take all our strength to defeat!"
+        return
+      end
+
+      ## Lets go on a random adventure and level up!
+      @character.level = @character.level + 1
       @character.save
       adventure = "#{@character.name} the #{@character.build} went forth and #{@@actions.sample} "\
        "a #{@@elements.sample}#{@@monsterPart.sample} #{@@monsterType.sample}. "\
