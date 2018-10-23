@@ -11,7 +11,7 @@ class CharactersController < ApplicationController
 
   @@clazz = ["Tank", "Wizard", "Rogue", "Priest", "Cleric", "Ranger", "Warrior", "Sorceror",
     "Witch", "Barbarian", "Cultist", "Banker", "Investigator", "NPC", "Warlock", "Bard", "Poet",
-    "Reporter"]
+    "Reporter", "Berserker", "Bomber"]
 
   @@actions = ["blasted", "fought", "smashed", "smooched", "befriended",
     "hugged", "obliterated", "did dirty", "offed", "chatted up", "stabbed", "knifed"]
