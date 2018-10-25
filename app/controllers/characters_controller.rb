@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 class CharactersController < ApplicationController
   @@elements = ["Fire", "Wind", "Water", "Earth", "Heart", "Ice", "Void", "Lightning",
     "Spike", "Life", "Molten", "Storm", "Hug", "Tea", "Stream", "Gravel",
@@ -65,7 +64,7 @@ class CharactersController < ApplicationController
     else
       if !@character.last_quest_date.nil?
         minutesSinceLQ = minutesSince(@character.last_quest_date)
-        if (minutesSinceLQ < 720)
+        if (minutesSinceLQ < 720 && $timeOut)
           render plain: "#{@character.name}#{@@tooSleepy.sample}"
           return
         end
