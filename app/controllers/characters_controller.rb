@@ -1,4 +1,7 @@
 class CharactersController < ApplicationController
+  before_action :checkUserKey, only: [:show]
+  before_action :checkChannel, only: [:show]
+
   @@elements = ["Fire", "Wind", "Water", "Earth", "Heart", "Ice", "Void", "Lightning",
     "Spike", "Life", "Molten", "Storm", "Hug", "Tea", "Stream", "Gravel",
     "Death", "Star", "Sun", "Moon", "Night", "Day", "Posion", "Exploding",
@@ -38,18 +41,6 @@ class CharactersController < ApplicationController
   # GET /characters/1
   # GET /characters/1.json
   def show
-    key = params[:key]
-    channel = params[:channel]
-    if (key != "goodkeysosecure")
-      render plain: "no good"
-      return
-    end
-
-    if (channel != "ivyteapot" && channel != "thorsus")
-      render plain: "nope"
-      return
-    end
-
     @character = Character.find_by(id: params[:id]) || Character.find_by(name: params[:id])
     if @character.nil?
       build = @@elements.sample + @@modifiers.sample + ' ' + @@clazz.sample
@@ -94,10 +85,7 @@ class CharactersController < ApplicationController
       ## Did we spawn a boss?
       roll_for_boss = rand 20
       if (roll_for_boss == 0)
-        boss = Boss.where(active: false).sample
-        boss.health = @character.level * ((rand 5) + 2)
-        boss.active = true
-        boss.save
+        boss = spawnBoss @character.level
         render plain: "#{boss.description} appears on the Path of Ivy causing #{@character.name} to reel back in horror! "\
             "This is the beast known as #{boss.name} and it will take all our strength to defeat!"
         return
