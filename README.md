@@ -1,24 +1,8 @@
-# README
+# Path of Ivy
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Most of the relevant logic lives in app/controllers/characters_controller.rb
 
-Things you may want to cover:
-
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+* Rails 5
+* Ruby 2.5.1
+* Setup with `bundle install`
+* Run with `rails server`
