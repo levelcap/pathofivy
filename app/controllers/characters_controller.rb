@@ -41,14 +41,16 @@ class CharactersController < ApplicationController
   # GET /characters/1
   # GET /characters/1.json
   def show
-    @character = Character.find_by(id: params[:id]) || Character.find_by(name: params[:id])
+    channel = params[:channel].downcase
+    @character = Character.find_by(id: params[:id]) || Character.find_by(name: params[:id], channel: channel)
     if @character.nil?
       build = @@elements.sample + @@modifiers.sample + ' ' + @@clazz.sample
       @character = Character.new(
         name: params[:id],
         build: build,
         level: 1,
-        description: 'It worked'
+        description: 'It worked',
+        channel: channel
       )
       @character.save
       render plain: "#{@character.name} - a level 1 #{@character.build} - has started to walk the Path of Ivy!"
