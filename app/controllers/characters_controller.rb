@@ -97,12 +97,12 @@ class CharactersController < ApplicationController
       if success_coinflip > 0
         @character.level = @character.level + 1
         @character.save
-        adventure = "#{success_coinflip} #{@character.name} the #{@character.build} went forth and #{@@actions.sample} "\
+        adventure = "#{@character.name} the #{@character.build} went forth and #{@@actions.sample} "\
          "a #{monster}. They are now level #{@character.level.to_s}!"
         render plain: adventure
         return
       else
-        adventure = "#{success_coinflip} #{@character.name} the #{@character.build} went forth got #{@@actions.sample} "\
+        adventure = "#{@character.name} the #{@character.build} went forth got #{@@actions.sample} "\
          "by a #{monster}. They have retreated in shame and probably blame RNG."
         render plain: adventure
       end
