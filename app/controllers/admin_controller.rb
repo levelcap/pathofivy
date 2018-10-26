@@ -26,4 +26,29 @@ class AdminController < ApplicationController
       render plain: " "
     end
   end
+
+  def factionScore
+    channel = params[:channel]
+    channelChars = Character.where(channel: channel).where.not(faction: [nil, ""]).all
+    birdoScore = 0
+    doggoScore = 0
+
+    channelChars.each do |character|
+      if character.faction === "birdo"
+        birdoScore += character.level
+      elsif character.faction === "doggo"
+        doggoScore += character.level
+      end
+    end
+
+    if birdoScore > doggoScore
+      render plain: "The Megachurch of Wagglewings exerts #{birdoScore} influence over the Path of Ivy, "\
+      "while The Glorious Crusade of Streamdog lags behind with only #{doggoScore}."
+    elsif doggoScore > birdoScore
+      render plain: "The Glorious Crusade of Streamdog exerts #{doggoScore} influence over the Path of Ivy, "\
+      "while The Megachurch of Wagglewings lags behind with only #{birdoScore}."
+    else
+      render plain: "The Megachurch of Wagglewings and The Glorious Crusade of Streamdog are in a dead heat, each exerting #{doggoScore} influence!"
+    end
+  end
 end
