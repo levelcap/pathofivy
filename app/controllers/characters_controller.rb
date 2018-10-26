@@ -92,12 +92,20 @@ class CharactersController < ApplicationController
       end
 
       ## Lets go on a random adventure and level up!
-      @character.level = @character.level + 1
-      @character.save
-      adventure = "#{@character.name} the #{@character.build} went forth and #{@@actions.sample} "\
-       "a #{@@elements.sample}#{@@monsterPart.sample} #{@@monsterType.sample}. "\
-       "They are now level #{@character.level.to_s}!"
-      render plain: adventure
+      monster = "#{@@elements.sample}#{@@monsterPart.sample} #{@@monsterType.sample}"
+      success_coinflip = rand 3
+      if success_coinflip > 0
+        @character.level = @character.level + 1
+        @character.save
+        adventure = "#{success_coinflip} #{@character.name} the #{@character.build} went forth and #{@@actions.sample} "\
+         "a #{monster}. They are now level #{@character.level.to_s}!"
+        render plain: adventure
+        return
+      else
+        adventure = "#{success_coinflip} #{@character.name} the #{@character.build} went forth got #{@@actions.sample} "\
+         "by a #{monster}. They have retreated in shame and probably blame RNG."
+        render plain: adventure
+      end
     end
   end
 
