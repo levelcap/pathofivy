@@ -41,9 +41,6 @@ class CharactersController < ApplicationController
         end
       end
 
-      @character.last_quest_date = DateTime.now
-      @character.save
-
       ## Is there a boss active?
       boss = Boss.find_by(active: true)
       unless boss.nil?
@@ -77,6 +74,7 @@ class CharactersController < ApplicationController
       # end
 
       ## Lets go on a random adventure and level up!
+      @character.last_quest_date = DateTime.now
       monster = Questing.getRandomMonster
       success_coinflip = rand 3
       ## First few levels are failure free!
