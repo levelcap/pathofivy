@@ -1,3 +1,27 @@
 // Place all the styles related to the Characters controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+.content {
+  width: 100%;
+  display: flex;
+  font-size: 16px;
+}
+
+.content div {
+  flex: 1;
+  flex-basis: auto;
+
+  .inner-info {
+    padding-left: 20px;
+    .label {
+      font-weight: bold;
+    }
+    td {
+      font-size: 16px;
+    }
+  }
+}
+
+h1, h2 {
+  text-align: center;
+}

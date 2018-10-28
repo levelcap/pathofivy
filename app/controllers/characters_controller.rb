@@ -4,8 +4,9 @@ class CharactersController < ApplicationController
 
   @@elements = ["Fire", "Wind", "Water", "Earth", "Heart", "Ice", "Void", "Lightning",
     "Spike", "Life", "Molten", "Storm", "Hug", "Tea", "Stream", "Gravel",
-    "Death", "Star", "Sun", "Moon", "Night", "Day", "Posion", "Exploding",
-    "Curse", "Blood", "Corpse", "Friendship", "Love", "Hate"]
+    "Death", "Star", "Sun", "Moon", "Night", "Day", "Poison", "Exploding",
+    "Curse", "Blood", "Corpse", "Friendship", "Love", "Hate", "Cuddle",
+    "Snuggle"]
 
   @@modifiers = ["shot", "siphon", "wave", "wall", "bounce", "beam", "knife", "sword", "hammer",
     "strike", "punch", "kick", "spin", "squidge", "drain", "blast", "mace", "spear", "slap", "pen",
@@ -19,12 +20,13 @@ class CharactersController < ApplicationController
     "hugged", "obliterated", "did dirty", "offed", "chatted up", "stabbed", "knifed"]
 
   @@monsterPart = ["wing", "claw", "fang", "tooth", "eye", "glare",
-    "scale", "talon", "snarl", "scream", "shriek", "knuckle"]
+    "scale", "talon", "snarl", "scream", "shriek", "knuckle", "hoof",
+    "maw", "horn", "nail", "gill", "fin", "spine"]
 
   @@monsterType = ["imp", "golem", "goblin", "bat", "vampire",
     "wolf", "spider", "kobold", "orc", "elf", "spirit", "demon",
     "angel", "devil", "dragon", "drake", "gorgon", "slaad", "djinn",
-    "mummy", "ghoul", "peasant", "troll"]
+    "mummy", "ghoul", "peasant", "troll", "shark"]
 
   @@tooSleepy = [
     ", having already walked the Path of Ivy once today, you find yourself quite sleepy and in really no mood to go on epic quests at all. Try again tomorrow!",
@@ -36,6 +38,16 @@ class CharactersController < ApplicationController
   # GET /characters.json
   def index
     @characters = Character.all
+  end
+
+  def nothing
+    render plain: " "
+  end
+
+  def sheet
+    channel = params[:channel].downcase
+    name = params[:name]
+    @character = Character.find_by(name: name, channel: channel)
   end
 
   def show
@@ -74,8 +86,9 @@ class CharactersController < ApplicationController
           render plain: "#{boss.name} is bleeding all over the Path of Ivy. "\
             "#{@character.name} #{@@actions.sample} #{boss.name} for #{damage} damage, killing it dead!"
             boss.active = false;
+            $timeOut = false
         else
-          render plain: "#{boss.description} named #{boss.name} is RUINING the Path of Ivy for everyone. "\
+          render plain: "#{boss.name} is RUINING the Path of Ivy for everyone. "\
             "#{@character.name} #{@@actions.sample} #{boss.name} for #{damage} damage, bringing it to #{health} life."
         end
         boss.save
@@ -83,18 +96,19 @@ class CharactersController < ApplicationController
       end
 
       ## Did we spawn a boss?
-      roll_for_boss = rand 20
-      if (roll_for_boss == 0)
-        boss = spawnBoss @character.level
-        render plain: "#{boss.description} appears on the Path of Ivy causing #{@character.name} to reel back in horror! "\
-            "This is the beast known as #{boss.name} and it will take all our strength to defeat!"
-        return
-      end
+      # roll_for_boss = rand 20
+      # if (roll_for_boss == 0)
+      #   boss = spawnBoss @character.level
+      #   render plain: "#{boss.description} appears on the Path of Ivy causing #{@character.name} to reel back in horror! "\
+      #       "This is the beast known as #{boss.name} and it will take all our strength to defeat!"
+      #   return
+      # end
 
       ## Lets go on a random adventure and level up!
       monster = "#{@@elements.sample}#{@@monsterPart.sample} #{@@monsterType.sample}"
       success_coinflip = rand 3
-      if success_coinflip > 0
+      ## First few levels are failure free!
+      if success_coinflip > 0 || @character.level <= 3
         @character.level = @character.level + 1
         @character.save
         adventure = "#{@character.name} the #{@character.build} went forth and #{@@actions.sample} "\
