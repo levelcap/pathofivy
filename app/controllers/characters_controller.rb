@@ -52,7 +52,7 @@ class CharactersController < ApplicationController
 
   def show
     channel = params[:channel].downcase
-    @character = Character.find_by(id: params[:id]) || Character.find_by(name: params[:id], channel: channel)
+    @character = Character.find_by(name: params[:id], channel: channel)
     if @character.nil?
       build = @@elements.sample + @@modifiers.sample + ' ' + @@clazz.sample
       @character = Character.new(
@@ -84,12 +84,16 @@ class CharactersController < ApplicationController
         boss.health = health;
         if (health <= 0)
           render plain: "#{boss.name} is bleeding all over the Path of Ivy. "\
-            "#{@character.name} #{@@actions.sample} #{boss.name} for #{damage} damage, killing it dead!"
+            "#{@character.name} #{@@actions.sample} #{boss.name} for #{damage} damage, killing it dead! "\
+            "Bonus levels all around!"
             boss.active = false;
-            $timeOut = false
+            $timeOut = true
+          awardBossLevels channel
         else
           render plain: "#{boss.name} is RUINING the Path of Ivy for everyone. "\
             "#{@character.name} #{@@actions.sample} #{boss.name} for #{damage} damage, bringing it to #{health} life."
+          @character.boss_damage += damage
+          @character.save
         end
         boss.save
         return
@@ -164,5 +168,23 @@ class CharactersController < ApplicationController
   private
   def minutesSince(date)
     return ((date - DateTime.now) / 60).abs.round
+  end
+
+  def awardBossLevels(channel)
+    channelChars = Character.where(channel: channel).where("boss_damage > ?", 0).each do |char|
+      bonusLevels = 1
+      damage = char.boss_damage
+      if (damage > 100)
+        bonusLevels = 4
+      elsif (damage > 50)
+        bonusLevels = 3
+      elsif (damage > 10)
+        bonusLevels = 2
+      end
+
+      char.level += bonusLevels
+      char.boss_damage = 0
+      char.save
+    end
   end
 end

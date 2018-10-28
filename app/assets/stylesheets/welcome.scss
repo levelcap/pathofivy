@@ -1,3 +1,16 @@
 // Place all the styles related to the welcome controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+body {
+  background-size:  cover;
+  opacity: .2;
+  min-height: 100vh;
+  width: 100%;
+}
+body.normal {
+  background-image: image-url("ivy_path.jpg");
+}
+
+body.boss {
+  background-image: image-url("monster_path.jpg");
+}
