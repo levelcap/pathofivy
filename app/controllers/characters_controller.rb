@@ -2,38 +2,6 @@ class CharactersController < ApplicationController
   before_action :checkUserKey, only: [:show, :faction]
   before_action :checkChannel, only: [:show, :faction]
 
-  @@elements = ["Fire", "Wind", "Water", "Earth", "Heart", "Ice", "Void", "Lightning",
-    "Spike", "Life", "Molten", "Storm", "Hug", "Tea", "Stream", "Gravel",
-    "Death", "Star", "Sun", "Moon", "Night", "Day", "Poison", "Exploding",
-    "Curse", "Blood", "Corpse", "Friendship", "Love", "Hate", "Cuddle",
-    "Snuggle"]
-
-  @@modifiers = ["shot", "siphon", "wave", "wall", "bounce", "beam", "knife", "sword", "hammer",
-    "strike", "punch", "kick", "spin", "squidge", "drain", "blast", "mace", "spear", "slap", "pen",
-    "explosion", "cannon", "sip"]
-
-  @@clazz = ["Tank", "Wizard", "Rogue", "Priest", "Cleric", "Ranger", "Warrior", "Sorceror",
-    "Witch", "Barbarian", "Cultist", "Banker", "Investigator", "NPC", "Warlock", "Bard", "Poet",
-    "Reporter", "Berserker", "Bomber", "Headhunter"]
-
-  @@actions = ["blasted", "fought", "smashed", "smooched", "befriended",
-    "hugged", "obliterated", "did dirty", "offed", "chatted up", "stabbed", "knifed"]
-
-  @@monsterPart = ["wing", "claw", "fang", "tooth", "eye", "glare",
-    "scale", "talon", "snarl", "scream", "shriek", "knuckle", "hoof",
-    "maw", "horn", "nail", "gill", "fin", "spine"]
-
-  @@monsterType = ["imp", "golem", "goblin", "bat", "vampire",
-    "wolf", "spider", "kobold", "orc", "elf", "spirit", "demon",
-    "angel", "devil", "dragon", "drake", "gorgon", "slaad", "djinn",
-    "mummy", "ghoul", "peasant", "troll", "shark"]
-
-  @@tooSleepy = [
-    ", having already walked the Path of Ivy once today, you find yourself quite sleepy and in really no mood to go on epic quests at all. Try again tomorrow!",
-    ", you have walked the Path of Ivy until your footsies are all raw and blistered. You head back home to give them a good soak. You'll be ready to tear it up again tomorrow!",
-    ", the things you have done on the Path of Ivy today will haunt your memories for all time. Or until tomorrow. Try tomorrow.",
-  ]
-
   # GET /characters
   # GET /characters.json
   def index
@@ -54,7 +22,7 @@ class CharactersController < ApplicationController
     channel = params[:channel].downcase
     @character = Character.find_by(name: params[:id], channel: channel)
     if @character.nil?
-      build = @@elements.sample + @@modifiers.sample + ' ' + @@clazz.sample
+      build = Questing.getRandomBuild
       @character = Character.new(
         name: params[:id],
         build: build,
@@ -68,7 +36,7 @@ class CharactersController < ApplicationController
       if !@character.last_quest_date.nil?
         minutesSinceLQ = minutesSince(@character.last_quest_date)
         if (minutesSinceLQ < 720 && $timeOut)
-          render plain: "#{@character.name}#{@@tooSleepy.sample}"
+          render plain: "#{@character.name}#{Questing.getRandomSleep}"
           return
         end
       end
@@ -84,14 +52,14 @@ class CharactersController < ApplicationController
         boss.health = health;
         if (health <= 0)
           render plain: "#{boss.name} is bleeding all over the Path of Ivy. "\
-            "#{@character.name} #{@@actions.sample} #{boss.name} for #{damage} damage, killing it dead! "\
+            "#{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage, killing it dead! "\
             "Bonus levels all around!"
             boss.active = false;
             $timeOut = true
           awardBossLevels channel
         else
           render plain: "#{boss.name} is RUINING the Path of Ivy for everyone. "\
-            "#{@character.name} #{@@actions.sample} #{boss.name} for #{damage} damage, bringing it to #{health} life."
+            "#{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage, bringing it to #{health} life."
           @character.boss_damage += damage
           @character.save
         end
@@ -109,18 +77,18 @@ class CharactersController < ApplicationController
       # end
 
       ## Lets go on a random adventure and level up!
-      monster = "#{@@elements.sample}#{@@monsterPart.sample} #{@@monsterType.sample}"
+      monster = Questing.getRandomMonster
       success_coinflip = rand 3
       ## First few levels are failure free!
       if success_coinflip > 0 || @character.level <= 3
         @character.level = @character.level + 1
         @character.save
-        adventure = "#{@character.name} the #{@character.build} went forth and #{@@actions.sample} "\
+        adventure = "#{@character.name} the #{@character.build} went forth and #{Questing.getRandomAction} "\
          "a #{monster}. They are now level #{@character.level.to_s}!"
         render plain: adventure
         return
       else
-        adventure = "#{@character.name} the #{@character.build} went forth got #{@@actions.sample} "\
+        adventure = "#{@character.name} the #{@character.build} went forth got #{Questing.getRandomAction} "\
          "by a #{monster}. They have retreated in shame and probably blame RNG."
         render plain: adventure
       end
