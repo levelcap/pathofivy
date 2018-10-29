@@ -2,9 +2,13 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 .content {
-  width: 100%;
+  background-color: rgba(255, 255, 255, .8);
+  width: 90%;
+  margin: auto;
   display: flex;
   font-size: 16px;
+  min-height: 50vh;
+  border: 2px solid green;
 }
 
 .content div {
@@ -24,4 +28,10 @@
 
 h1, h2 {
   text-align: center;
+}
+
+.header h1 {
+  color: white;
+  text-shadow: 2px 2px 2px black;
+  padding-top: 20px;
 }

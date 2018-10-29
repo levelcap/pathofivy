@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_10_28_170034) do
+ActiveRecord::Schema.define(version: 2018_10_29_164712) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -36,6 +36,7 @@ ActiveRecord::Schema.define(version: 2018_10_28_170034) do
     t.string "channel", default: "ivyteapot"
     t.string "faction"
     t.integer "boss_damage", default: 0
+    t.bigint "xp", default: 0
   end
 
   create_table "users", force: :cascade do |t|
