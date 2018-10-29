@@ -99,7 +99,7 @@ class CharactersController < ApplicationController
     factionChoice = params[:faction] ? params[:faction].downcase : ""
 
     if @character.nil?
-      render plain: "#{params[:name]}, have not yet walked the Path of Ivy. Type !pathofivy to begin your journey."
+      render plain: "#{params[:name]}, you have not yet walked the Path of Ivy. Type !pathofivy to begin your journey."
       return
     end
 
