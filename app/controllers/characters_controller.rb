@@ -49,14 +49,14 @@ class CharactersController < ApplicationController
         boss.health = health;
         if (health <= 0)
           render plain: "#{boss.name} is bleeding all over the Path of Ivy. "\
-            "#{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage, killing it dead! "\
+            "KAPOW #{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage, killing it dead! "\
             "Bonus levels all around!"
             boss.active = false;
             $timeOut = true
           awardBossLevels channel
         else
           render plain: "#{boss.name} is RUINING the Path of Ivy for everyone. "\
-            "#{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage, bringing it to #{health} life."
+            "KAPOW #{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage, bringing it to #{health} life."
           @character.boss_damage += damage
           @character.save
         end
