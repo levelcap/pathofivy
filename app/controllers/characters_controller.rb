@@ -80,7 +80,6 @@ class CharactersController < ApplicationController
       ## First few levels are failure free!
       if success_coinflip > 0 || @character.level <= 3
         @character.level = @character.level + 1
-        @character.save
         adventure = "#{@character.name} the #{@character.build} went forth and #{Questing.getRandomAction} "\
          "a #{monster}. They are now level #{@character.level.to_s}!"
         render plain: adventure
@@ -90,6 +89,7 @@ class CharactersController < ApplicationController
          "by a #{monster}. They have retreated in shame and probably blame RNG."
         render plain: adventure
       end
+      @character.save
     end
   end
 
