@@ -83,7 +83,6 @@ class CharactersController < ApplicationController
         adventure = "#{@character.name} the #{@character.build} went forth and #{Questing.getRandomAction} "\
          "a #{monster}. They are now level #{@character.level.to_s}!"
         render plain: adventure
-        return
       else
         adventure = "#{@character.name} the #{@character.build} went forth got #{Questing.getRandomAction} "\
          "by a #{monster}. They have retreated in shame and probably blame RNG."
