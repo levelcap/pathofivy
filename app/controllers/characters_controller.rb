@@ -85,7 +85,7 @@ class CharactersController < ApplicationController
         render plain: adventure
       else
         adventure = "#{@character.name} the #{@character.build} went forth got #{Questing.getRandomAction} "\
-         "by a #{monster}. They have retreated in shame and probably blame RNG."
+         "by a #{monster}. #{Questing.getRandomFail(@character)}"
         render plain: adventure
       end
       @character.save
