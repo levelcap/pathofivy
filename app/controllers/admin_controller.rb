@@ -27,6 +27,30 @@ class AdminController < ApplicationController
     end
   end
 
+  def addBoss
+    level = params[:level].to_i
+    name = params[:name].to_i
+    $timeOut = false
+    ## Is there an active boss already?
+    boss = Boss.find_by(active: true)
+    unless boss.nil?
+      boss.active = false
+      boss.save
+    end
+
+    # Create the new boss
+    boss = Boss.new(
+      name: name,
+      description: 'A glowing bastion of generous spirit, but with fangs and claws',
+      health: level * ((rand 5) + 2),
+      active: true
+    )
+    boss.save
+    render plain: "#{boss.name}'s legendary generosity has strained the boundaries of reality and turned '. "\
+        "them into a towering angry bossfight!  "\
+        "Timeouts are off, let us band together show our appreciation via stabbing!"
+  end
+
   def factionScore
     channel = params[:channel]
     channelChars = Character.where(channel: channel).where.not(faction: [nil, ""]).all
