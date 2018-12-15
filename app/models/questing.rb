@@ -23,7 +23,7 @@ class Questing
 
   @@monsterType = ["imp", "golem", "goblin", "bat", "vampire",
     "wolf", "spider", "kobold", "orc", "elf", "spirit", "demon",
-    "angel", "devil", "dragon", "drake", "gorgon", "slaad", "djinn",
+    "angel", "devil", "dragon", "drake", "gorgon", "slaad", "salad", "djinn",
     "mummy", "ghoul", "peasant", "troll", "shark"]
 
   @@tooSleepy = [
