@@ -46,7 +46,7 @@ class AdminController < ApplicationController
       active: true
     )
     boss.save
-    render plain: "#{boss.name}'s legendary generosity has strained the boundaries of reality and turned '. "\
+    render plain: "#{boss.name}'s legendary generosity has strained the boundaries of reality and turned "\
         "them into a towering angry bossfight!  "\
         "Timeouts are off, let us band together show our appreciation via stabbing!"
   end
