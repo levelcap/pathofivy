@@ -29,7 +29,7 @@ class AdminController < ApplicationController
 
   def addBoss
     level = params[:level].to_i
-    name = params[:name].to_i
+    name = params[:name]
     $timeOut = false
     ## Is there an active boss already?
     boss = Boss.find_by(active: true)
