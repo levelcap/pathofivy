@@ -36,6 +36,7 @@ class Questing
   @@failures = [
     "They have retreated in shame and probably blame RNG.",
     "BUILD must have been nerfed in pathofivy 1.0.2, stupid devs!",
+    "They have gone home, and brought great shame upon their family."
   ]
 
   def self.getRandomMonster
