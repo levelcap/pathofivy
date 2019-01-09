@@ -56,6 +56,6 @@ class Questing
   end
 
   def self.getRandomFail(character)
-    return @@failures.sample.sub!("BUILD", character.build)
+    return @@failures.sample.sub("BUILD", character.build)
   end
 end

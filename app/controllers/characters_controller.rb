@@ -44,7 +44,8 @@ class CharactersController < ApplicationController
       ## Is there a boss active?
       boss = Boss.find_by(active: true)
       unless boss.nil?
-        damage = (rand @character.level) + 1
+        ## Adds less swing to high level character damage, lets low level still deal satisfying damage
+        damage = [1, (@character.level + rand(-5..5))].max
         health = boss.health - damage
         boss.health = health;
         if (health <= 0)
