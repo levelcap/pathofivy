@@ -18,7 +18,7 @@ class ApplicationController < ActionController::Base
 
   def checkChannel
     channel = params[:channel].downcase
-    if (channel != "ivyteapot" && channel != "thorsus")
+    if (channel != "ivyteapot" && channel != "thorsus" && channel != "aphelionpoe")
       render plain: "nope"
       return
     end
