@@ -18,6 +18,13 @@ class CharactersController < ApplicationController
     @character = Character.find_by(name: name, channel: channel)
   end
 
+  def report
+    channel = params[:channel].downcase
+    name = params[:name]
+    @character = Character.find_by(name: name, channel: channel)
+    render plain: "#{@character.name} is a level #{@character.level} #{@character.build}."
+  end
+
   def show
     channel = params[:channel].downcase
     @character = Character.find_by(name: params[:id], channel: channel)
