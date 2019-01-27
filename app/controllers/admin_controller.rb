@@ -51,6 +51,18 @@ class AdminController < ApplicationController
         "Timeouts are off, let us band together show our appreciation via stabbing!"
   end
 
+  def raidWipe
+    boss = Boss.find_by(active: true)
+    unless boss.nil?
+      boss.active = false
+      boss.save
+      $timeOut = true
+    end
+    render plain: "Suddenly, a bolt of lightning streaks through the body of #{boss.name}, "\
+      "causing them to explode in a shower of shiny lights! As spectacular as it was, nobody "\
+      "really learned anything from the experience."
+  end
+
   def factionScore
     channel = params[:channel]
     channelChars = Character.where(channel: channel).where.not(faction: [nil, ""]).all

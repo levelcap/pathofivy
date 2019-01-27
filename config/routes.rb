@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   get '/admin/boss', to: 'admin#bossFight'
   get '/admin/addboss', to: 'admin#addBoss'
   get '/admin/factions', to: 'admin#factionScore'
+  get '/admin/raidWipe', to: 'admin#raidWipe'
   get '/nothing', to: 'characters#nothing'
   root 'welcome#index'
 end
