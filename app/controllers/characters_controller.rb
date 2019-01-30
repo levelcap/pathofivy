@@ -53,8 +53,8 @@ class CharactersController < ApplicationController
       render plain: "#{@character.name} - a level 1 #{@character.build} - has started to walk the Path of Ivy!"
     else
       if !@character.last_quest_date.nil?
-        #minutesSinceLQ = minutesSince(@character.last_quest_date)
-        minutesSinceLQ = 721 # for testing
+        minutesSinceLQ = minutesSince(@character.last_quest_date)
+        #minutesSinceLQ = 721 # for testing
         if (minutesSinceLQ < 720 && $timeOut)
           render plain: "#{@character.name}#{Questing.getRandomSleep}"
           return
