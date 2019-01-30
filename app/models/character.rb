@@ -9,4 +9,5 @@ class Character < ApplicationRecord
       return "Unaligned"
     end
   end
+
 end

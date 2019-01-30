@@ -6,23 +6,34 @@ class CharactersController < ApplicationController
   # GET /characters.json
   def index
     @characters = Character.all
-  end
+  end # end index
 
   def nothing
     render plain: " "
-  end
+  end # end nothing
 
   def sheet
     channel = params[:channel].downcase
     name = params[:name]
     @character = Character.find_by(name: name, channel: channel)
-  end
+  end # end sheet
 
   def report
     channel = params[:channel].downcase
     name = params[:name]
     @character = Character.find_by(name: name, channel: channel)
-    render plain: "#{@character.name} is a level #{@character.level} #{@character.build}."
+    xpToNextLevel = @character.level*25 + 100
+    render plain: "#{@character.name} is a level #{@character.level} #{@character.build}"\
+    " and has #{@character.xp}/#{xpToNextLevel} xp to the next level."
+  end # end report
+
+  def reportBoss
+    boss = Boss.find_by(active: true)
+    if boss.nil?
+      render plain: "No active boss"
+    else
+      render plain: "Boss #{boss.name} level #{boss.level} is active with #{boss.health} health remaining"
+    end
   end
 
   def show
@@ -35,13 +46,15 @@ class CharactersController < ApplicationController
         build: build,
         level: 1,
         description: 'It worked',
-        channel: channel
+        channel: channel,
+        xp: 0
       )
       @character.save
       render plain: "#{@character.name} - a level 1 #{@character.build} - has started to walk the Path of Ivy!"
     else
       if !@character.last_quest_date.nil?
-        minutesSinceLQ = minutesSince(@character.last_quest_date)
+        #minutesSinceLQ = minutesSince(@character.last_quest_date)
+        minutesSinceLQ = 721 # for testing
         if (minutesSinceLQ < 720 && $timeOut)
           render plain: "#{@character.name}#{Questing.getRandomSleep}"
           return
@@ -58,10 +71,11 @@ class CharactersController < ApplicationController
         if (health <= 0)
           render plain: "#{boss.name} is bleeding all over the Path of Ivy. "\
             "KAPOW #{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage, killing it dead! "\
-            "Bonus levels all around!"
+            "All fighters gain exp!"
             boss.active = false;
             $timeOut = true
-          awardBossLevels channel
+          #awardBossLevels channel
+          awardBossXP(channel, boss.level)
         else
           render plain: "#{boss.name} is RUINING the Path of Ivy for everyone. "\
             "KAPOW #{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage, bringing it to #{health} life."
@@ -70,7 +84,7 @@ class CharactersController < ApplicationController
         end
         boss.save
         return
-      end
+      end # end unless
 
       ## Did we spawn a boss?
       # roll_for_boss = rand 20
@@ -84,21 +98,32 @@ class CharactersController < ApplicationController
       ## Lets go on a random adventure and level up!
       @character.last_quest_date = DateTime.now
       monster = Questing.getRandomMonster
-      success_coinflip = rand 3
+      
       ## First few levels are failure free!
-      if success_coinflip > 0 || @character.level <= 3
-        @character.level = @character.level + 1
-        adventure = "#{@character.name} the #{@character.build} went forth and #{Questing.getRandomAction} "\
-         "a #{monster}. They are now level #{@character.level.to_s}!"
-        render plain: adventure
+      if @character.level <= 3
+        success_coinflip = 3
       else
-        adventure = "#{@character.name} the #{@character.build} went forth got #{Questing.getRandomAction} "\
-         "by a #{monster}. #{Questing.getRandomFail(@character)}"
-        render plain: adventure
+        success_coinflip = rand 3
+      end      
+
+      if success_coinflip > 0
+        #@character.level = @character.level + 1        
+        adventure = "#{@character.name} the #{@character.build} went forth and #{Questing.getRandomAction} "\
+        "a #{monster}." #{@character.name} gains 25 xp!""
+        
+        adventure += awardXP(channel, @character.name, 100)     
+        #"a #{monster}. They are now level #{@character.level.to_s}!"                
+      else
+        adventure = "#{@character.name} the #{@character.build} went forth and got #{Questing.getRandomAction} "\
+        "by a #{monster}. #{Questing.getRandomFail(@character)}"
+        #render plain: adventure
       end
+    
+      render plain: adventure
       @character.save
-    end
-  end
+    end # end else
+
+  end # end show
 
   def faction
     channel = params[:channel].downcase
@@ -136,12 +161,31 @@ class CharactersController < ApplicationController
     else
       render plain: "#{factionChoice} is not a valid faction"
     end
-  end
+
+  end # end faction
+
+  # Add experience to character and check for level up
+  def awardXPPublic
+    channel = params[:channel].downcase
+    name = params[:name]
+    experience = params[:experience]
+    @character = Character.find_by(name: name, channel: channel)    
+    @character.xp += experience.to_i
+    xpmsg = "#{experience} xp awarded to #{@character.name}"
+    if (@character.xp >= (@character.level-1)*25 + 100)
+      @character.level += 1
+      xpmsg += "\n#{@character.name} has reached level #{@character.level}!!"
+      @character.xp = 0
+    end
+    render plain: xpmsg
+    @character.save
+  end # end awardXPPublic
+
 
   private
   def minutesSince(date)
     return ((date - DateTime.now) / 60).abs.round
-  end
+  end # end minutesSince
 
   def awardBossLevels(channel)
     channelChars = Character.where(channel: channel).where("boss_damage > ?", 0).each do |char|
@@ -154,10 +198,58 @@ class CharactersController < ApplicationController
       elsif (damage > 10)
         bonusLevels = 2
       end
-
+  
       char.level += bonusLevels
       char.boss_damage = 0
       char.save
+
+    end # end block
+  end # end awardBossLevels
+
+  def awardBossXP(channel, bossLevel)
+    channelChars = Character.where(channel: channel).where("boss_damage > ?", 0).each do |char|
+    
+      playerLevelDiff = bossLevel - char.level
+      if (playerLevelDiff < -5)
+        experiences = bossLevel*2
+      elsif (playerLevelDiff < 5)
+        experiences = bossLevel*10
+      elsif (playerLevelDiff >= 5)
+        experiences = bossLevel*50
+      else
+        experiences = 0    # should never get here
+      end
+
+    awardXP(channel, char.name, experiences)
+    char.boss_damage = 0
+    char.save
+    
+    end # end block
+  end # end awardBossXP
+  
+
+  # Add experience to character and check for level up
+  def awardXP(channel, name, experience)
+    #@character = Character.find_by(name: name, channel: channel)   
+    #channel = params[:channel].downcase
+    #name = params[:name]
+    @character = Character.find_by(name: name, channel: channel)    
+    @character.xp += experience
+
+    xpmsg = " #{@character.name} gains #{experience} xp!"
+    
+    if (@character.xp >= (@character.level-1)*25 + 100)
+      @character.level += 1
+      xpmsg += " #{@character.name} has reached level #{@character.level}!!"
+      @character.xp = 0
     end
-  end
-end
+
+    @character.save
+      
+    xpmsg # implicit return
+    
+  end # end awardXP
+
+  #end # end private
+
+end # end Class

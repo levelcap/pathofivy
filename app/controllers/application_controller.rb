@@ -28,6 +28,7 @@ class ApplicationController < ActionController::Base
     boss = Boss.where(active: false).all.sample
     boss.health = level * ((rand 5) + 2)
     boss.active = true
+    boss.level = level
     boss.save
     return boss
   end

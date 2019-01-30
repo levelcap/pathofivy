@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_10_29_164712) do
+ActiveRecord::Schema.define(version: 2019_01_30_153123) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -23,6 +23,7 @@ ActiveRecord::Schema.define(version: 2018_10_29_164712) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "channel", default: "ivyteapot"
+    t.integer "level"
   end
 
   create_table "characters", force: :cascade do |t|

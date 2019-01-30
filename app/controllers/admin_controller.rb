@@ -19,7 +19,7 @@ class AdminController < ApplicationController
     boss = Boss.find_by(active: true)
     if boss.nil?
       boss = spawnBoss level
-      render plain: "While the streamer is away #{boss.name} will play. "\
+      render plain: "While the streamer is away level #{level} #{boss.name} will play. "\
         "#{boss.description} appears on the Path of Ivy, just making a real mess out of everything. "\
         "Timeouts are off, let us band together and wreck face for great glory!"
     else
@@ -53,14 +53,16 @@ class AdminController < ApplicationController
 
   def raidWipe
     boss = Boss.find_by(active: true)
-    unless boss.nil?
+    if boss.nil?
+      render plain: "No active boss"
+    else
+      render plain: "Suddenly, a bolt of lightning streaks through the body of #{boss.name}, "\
+      "causing them to explode in a shower of shiny lights! As spectacular as it was, nobody "\
+      "really learned anything from the experience."
       boss.active = false
       boss.save
       $timeOut = true
     end
-    render plain: "Suddenly, a bolt of lightning streaks through the body of #{boss.name}, "\
-      "causing them to explode in a shower of shiny lights! As spectacular as it was, nobody "\
-      "really learned anything from the experience."
   end
 
   def factionScore

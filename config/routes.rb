@@ -5,6 +5,8 @@ Rails.application.routes.draw do
   get '/characters/:name/faction', to: 'characters#faction'
   get '/characters/:channel/:name/sheet', to: 'characters#sheet'
   get '/characters/:channel/:name/report', to: 'characters#report'
+  get '/characters/:channel/:name/xp', to: 'characters#awardXPPublic'
+  get '/characters/:channel/reportboss', to: 'characters#reportBoss'
   get '/admin/timeout', to: 'admin#toggleTimeout'
   get '/admin/boss', to: 'admin#bossFight'
   get '/admin/addboss', to: 'admin#addBoss'
