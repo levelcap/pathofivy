@@ -22,7 +22,7 @@ class CharactersController < ApplicationController
     channel = params[:channel].downcase
     name = params[:name]
     @character = Character.find_by(name: name, channel: channel)
-    xpToNextLevel = @character.level*25 + 100
+    xpToNextLevel = getXPToNextLevel(@character.level)# @character.level*25 + 100 # is there a way to make a macro or something for this?
     render plain: "#{@character.name} is a level #{@character.level} #{@character.build}"\
     " and has #{@character.xp}/#{xpToNextLevel} xp to the next level."
   end # end report
@@ -238,7 +238,8 @@ class CharactersController < ApplicationController
 
     xpmsg = " #{@character.name} gains #{experience} xp!"
     
-    if (@character.xp >= (@character.level-1)*25 + 100)
+    #if (@character.xp >= (@character.level-1)*25 + 100)
+    if (@character.xp >= getXPToNextLevel(@character.level) )
       @character.level += 1
       xpmsg += " #{@character.name} has reached level #{@character.level}!!"
       @character.xp = 0
@@ -250,6 +251,8 @@ class CharactersController < ApplicationController
     
   end # end awardXP
 
-  #end # end private
+  def getXPToNextLevel(level)
+    level*25 + 100
+  end
 
 end # end Class
