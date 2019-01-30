@@ -166,7 +166,7 @@ class CharactersController < ApplicationController
 
   end # end faction
 
-  # Add experience to character and check for level up
+  # Add experience to character and check for level up - publicly accessible in case streamer wants to add xp to someone
   def awardXPPublic
     channel = params[:channel].downcase
     name = params[:name]
@@ -252,7 +252,7 @@ class CharactersController < ApplicationController
   end # end awardXP
 
   def getXPToNextLevel(level)
-    level*25 + 100
+    level*25 + 100 # implicit return
   end
 
 end # end Class
