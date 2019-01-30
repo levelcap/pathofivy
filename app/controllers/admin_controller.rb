@@ -18,7 +18,7 @@ class AdminController < ApplicationController
     ## Is there an active boss already?
     boss = Boss.find_by(active: true)
     if boss.nil?
-      boss = spawnBoss level
+      boss = spawnBoss(level)
       render plain: "While the streamer is away level #{level} #{boss.name} will play. "\
         "#{boss.description} appears on the Path of Ivy, just making a real mess out of everything. "\
         "Timeouts are off, let us band together and wreck face for great glory!"

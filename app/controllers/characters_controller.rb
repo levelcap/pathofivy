@@ -72,6 +72,8 @@ class CharactersController < ApplicationController
           render plain: "#{boss.name} is bleeding all over the Path of Ivy. "\
             "KAPOW #{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage, killing it dead! "\
             "All fighters gain exp!"
+            @character.boss_damage += damage
+            @character.save            
             boss.active = false;
             $timeOut = true
           #awardBossLevels channel
@@ -216,8 +218,6 @@ class CharactersController < ApplicationController
         experiences = bossLevel*10
       elsif (playerLevelDiff >= 5)
         experiences = bossLevel*50
-      else
-        experiences = 0    # should never get here
       end
 
     awardXP(channel, char.name, experiences)
