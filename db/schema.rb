@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_01_30_153123) do
+ActiveRecord::Schema.define(version: 2019_02_02_035013) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -24,6 +24,7 @@ ActiveRecord::Schema.define(version: 2019_01_30_153123) do
     t.datetime "updated_at", null: false
     t.string "channel", default: "ivyteapot"
     t.integer "level"
+    t.integer "maxhealth"
   end
 
   create_table "characters", force: :cascade do |t|
@@ -38,6 +39,7 @@ ActiveRecord::Schema.define(version: 2019_01_30_153123) do
     t.string "faction"
     t.integer "boss_damage", default: 0
     t.bigint "xp", default: 0
+    t.integer "trophies"
   end
 
   create_table "users", force: :cascade do |t|

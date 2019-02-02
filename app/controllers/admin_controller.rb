@@ -19,7 +19,7 @@ class AdminController < ApplicationController
     boss = Boss.find_by(active: true)
     if boss.nil?
       boss = spawnBoss(level)
-      render plain: "While the streamer is away level #{level} #{boss.name} will play. "\
+      render plain: "While the streamer is away level #{level} #{boss.name} with #{boss.health} hp will play. "\
         "#{boss.description} appears on the Path of Ivy, just making a real mess out of everything. "\
         "Timeouts are off, let us band together and wreck face for great glory!"
     else
@@ -42,13 +42,15 @@ class AdminController < ApplicationController
     boss = Boss.new(
       name: name,
       description: 'A glowing bastion of generous spirit, but with fangs and claws',
-      health: level * ((rand 5) + 2),
-      active: true
+      maxhealth: level * ((rand 5) + 2),
+      health: 0,
+      active: false
     )
     boss.save
     render plain: "#{boss.name}'s legendary generosity has strained the boundaries of reality and turned "\
         "them into a towering angry bossfight!  "\
-        "Timeouts are off, let us band together show our appreciation via stabbing!"
+        #"Timeouts are off, let us band together show our appreciation via stabbing!"
+        "Be wary, you may encounter them along the Path of Ivy!"
   end
 
   def raidWipe
@@ -63,7 +65,7 @@ class AdminController < ApplicationController
       boss.save
       $timeOut = true
     end
-  end
+  end # end raidWipe
 
   def factionScore
     channel = params[:channel]
@@ -89,4 +91,4 @@ class AdminController < ApplicationController
       render plain: "The Megachurch of Wagglewings and The Glorious Crusade of Streamdog are in a dead heat, each exerting #{doggoScore} influence!"
     end
   end
-end
+end # end factionScore

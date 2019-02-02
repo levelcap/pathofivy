@@ -22,9 +22,9 @@ class CharactersController < ApplicationController
     channel = params[:channel].downcase
     name = params[:name]
     @character = Character.find_by(name: name, channel: channel)
-    xpToNextLevel = getXPToNextLevel(@character.level)# @character.level*25 + 100 # is there a way to make a macro or something for this?
-    render plain: "#{@character.name} is a level #{@character.level} #{@character.build}"\
-    " and has #{@character.xp}/#{xpToNextLevel} xp to the next level."
+    xpToNextLevel = getXPToNextLevel(@character.level)
+    render plain: "#{@character.name} is a level #{@character.level} #{@character.build} with #{@character.trophies} boss trophies"\
+    " and has #{@character.xp}/#{xpToNextLevel} xp to the next level. "
   end # end report
 
   def reportBoss
@@ -36,6 +36,65 @@ class CharactersController < ApplicationController
     end
   end
 
+  def reportTopTrophies
+    channel = params[:channel].downcase
+    num = params[:num].to_i
+    #num = 5
+    x = 0
+    y = 0
+    trophylist = []
+    output = ""
+   
+    # make ordered list of number of trophies that appear
+    topTrophies = Character.where(channel: channel).where("trophies > ?", 0).each do |tlist|
+     trophylist << tlist.trophies
+    end
+    
+    trophylist.sort! { |x,y| y <=> x} # use sort! to sort in place rather than create new array or it doesn't work
+
+    if trophylist.length > 0
+      trophylist = trophylist.uniq.first(num)
+    end
+    #output += "trophylist = #{trophylist} num = #{num} "
+    # identify all players having trophy counts matching elements of built-up array and form output string
+    topTrophies = Character.where(channel: channel).where("trophies > ?", 0)
+
+    if topTrophies.length <= 0
+      output = "Nobody has any trophies!"
+      render plain: output # investigate removing this early return
+      return
+    else
+      output += "The top Path of Ivy warriors: "
+      
+      # go through all characters and make arrays of characters that have that many trophies
+      trophylist.each do |tlist|
+        taggedChars = Character.where(channel: channel).where("trophies = ?", trophylist[x]).order(:name).sort # do we need .sort?
+        if tlist == 1
+          output += "With #{tlist} trophy: "
+        else
+          output += "With #{tlist} trophies: "
+        end
+
+        # go through compiled array and build a string
+        y = 0
+        while y < taggedChars.length
+          
+          if y === taggedChars.length-1
+            output += "#{taggedChars[y].name}. "
+          else
+            output += "#{taggedChars[y].name}, "
+          end
+          y += 1
+        end # end while
+        x += 1
+      end # end until
+
+    end # end if-else
+
+    render plain: output
+
+  end # end reportTopTrophies
+
   def show
     channel = params[:channel].downcase
     @character = Character.find_by(name: params[:id], channel: channel)
@@ -45,6 +104,7 @@ class CharactersController < ApplicationController
         name: params[:id],
         build: build,
         level: 1,
+        trophies: 0,
         description: 'It worked',
         channel: channel,
         xp: 0
@@ -52,6 +112,12 @@ class CharactersController < ApplicationController
       @character.save
       render plain: "#{@character.name} - a level 1 #{@character.build} - has started to walk the Path of Ivy!"
     else
+
+      # temporary compensation for no trophies field in case migration fucked up
+      if @character.trophies.nil?
+        @character.trophies = 0
+      end
+
       if !@character.last_quest_date.nil?
         minutesSinceLQ = minutesSince(@character.last_quest_date)
         #minutesSinceLQ = 721 # for testing
@@ -71,16 +137,32 @@ class CharactersController < ApplicationController
         if (health <= 0)
           render plain: "#{boss.name} is bleeding all over the Path of Ivy. "\
             "KAPOW #{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage, killing it dead! "\
-            "All fighters gain exp!"
+            "All fighters gain exp! Congratulations to #{@character.name} for landing the killing blow!"
             @character.boss_damage += damage
+            awardtrophy = 1
+            @character.trophies += awardtrophy
             @character.save            
-            boss.active = false;
+            boss.active = false
             $timeOut = true
           #awardBossLevels channel
           awardBossXP(channel, boss.level)
         else
-          render plain: "#{boss.name} is RUINING the Path of Ivy for everyone. "\
-            "KAPOW #{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage, bringing it to #{health} life."
+          output =  "#{boss.name} is RUINING the Path of Ivy for everyone. "\
+            "KAPOW #{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage!"
+          if (boss.health.to_f / boss.maxhealth.to_f) < 0.5
+            if (boss.health.to_f / boss.maxhealth.to_f) < 0.25
+              if (boss.health.to_f / boss.maxhealth.to_f) < 0.1
+                output += " #{boss.name} is on its last legs, if it even has legs! " # less than 10%
+              else
+                output += " #{boss.name} looks badly injured!" # less than 25%
+              end
+              
+            else
+              output += " #{boss.name} looks pretty hurt!" # less than 50%
+            end            
+          end
+
+          render plain: output
           @character.boss_damage += damage
           @character.save
         end
@@ -111,14 +193,14 @@ class CharactersController < ApplicationController
       if success_coinflip > 0
         #@character.level = @character.level + 1        
         adventure = "#{@character.name} the #{@character.build} went forth and #{Questing.getRandomAction} "\
-        "a #{monster}." #{@character.name} gains 25 xp!""
-        
-        adventure += awardXP(channel, @character.name, 100)     
-        #"a #{monster}. They are now level #{@character.level.to_s}!"                
+        "a #{monster}."         
+        adventure += awardXP(channel, @character.name, 100)    # change this away from a magic number sometime
+        $timeOut = true 
+
       else
         adventure = "#{@character.name} the #{@character.build} went forth and got #{Questing.getRandomAction} "\
         "by a #{monster}. #{Questing.getRandomFail(@character)}"
-        #render plain: adventure
+        $timeOut = true
       end
     
       render plain: adventure
@@ -230,9 +312,6 @@ class CharactersController < ApplicationController
 
   # Add experience to character and check for level up
   def awardXP(channel, name, experience)
-    #@character = Character.find_by(name: name, channel: channel)   
-    #channel = params[:channel].downcase
-    #name = params[:name]
     @character = Character.find_by(name: name, channel: channel)    
     @character.xp += experience
 

@@ -26,7 +26,8 @@ class ApplicationController < ActionController::Base
 
   def spawnBoss(level)
     boss = Boss.where(active: false).all.sample
-    boss.health = level * ((rand 5) + 20)
+    boss.maxhealth = level * ((rand 5) + 20)
+    boss.health = boss.maxhealth
     boss.active = true
     boss.level = level
     boss.save
