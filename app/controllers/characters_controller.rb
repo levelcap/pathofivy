@@ -23,6 +23,11 @@ class CharactersController < ApplicationController
     name = params[:name]
     @character = Character.find_by(name: name, channel: channel)
     xpToNextLevel = getXPToNextLevel(@character.level)
+
+    if @character.trophies.nil?
+      @character.trophies = 0
+    end
+
     render plain: "#{@character.name} is a level #{@character.level} #{@character.build} with #{@character.trophies} boss trophies"\
     " and has #{@character.xp}/#{xpToNextLevel} xp to the next level. "
   end # end report
