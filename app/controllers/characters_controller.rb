@@ -27,9 +27,16 @@ class CharactersController < ApplicationController
     if @character.trophies.nil?
       @character.trophies = 0
     end
-
-    render plain: "#{@character.name} is a level #{@character.level} #{@character.build} with #{@character.trophies} boss trophies"\
-    " and has #{@character.xp}/#{xpToNextLevel} xp to the next level. "
+    output = "#{@character.name} is a level #{@character.level} #{@character.build} with #{@character.trophies} boss "\
+    
+    if (@character.trophies === 1)
+      output += "trophy"
+    else
+      output += "trophies"
+    end
+    
+    output += " and has #{@character.xp}/#{xpToNextLevel} xp to the next level. "
+    render plain: output
   end # end report
 
   def reportBoss
