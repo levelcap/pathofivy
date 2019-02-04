@@ -127,7 +127,9 @@ class CharactersController < ApplicationController
         minutesSinceLQ = minutesSince(@character.last_quest_date)
         #minutesSinceLQ = 721 # for testing
         if (minutesSinceLQ < 720 && $timeOut)
-          render plain: "#{@character.name}#{Questing.getRandomSleep}"
+          adventure = "#{@character.name}#{Questing.getRandomSleep}"
+          render plain: adventure
+          @character.save
           return
         end
       end
@@ -184,7 +186,7 @@ class CharactersController < ApplicationController
       #   return
       # end
 
-      ## Lets go on a random adventure and level up!
+      ## Lets go on a random adventure and get exp!
       @character.last_quest_date = DateTime.now
       monster = Questing.getRandomMonster
       
@@ -200,15 +202,14 @@ class CharactersController < ApplicationController
         adventure = "#{@character.name} the #{@character.build} went forth and #{Questing.getRandomAction} "\
         "a #{monster}."         
         adventure += awardXP(channel, @character.name, 100)    # change this away from a magic number sometime
-        $timeOut = true 
-
+        
       else
         adventure = "#{@character.name} the #{@character.build} went forth and got #{Questing.getRandomAction} "\
         "by a #{monster}. #{Questing.getRandomFail(@character)}"
-        $timeOut = true
       end
-    
+
       render plain: adventure
+      $timeOut = true 
       @character.save
     end # end else
 
@@ -295,6 +296,7 @@ class CharactersController < ApplicationController
     end # end block
   end # end awardBossLevels
 
+  # award XP to block of characters that participated in the boss fight
   def awardBossXP(channel, bossLevel)
     channelChars = Character.where(channel: channel).where("boss_damage > ?", 0).each do |char|
     
@@ -313,11 +315,10 @@ class CharactersController < ApplicationController
     
     end # end block
   end # end awardBossXP
-  
 
-  # Add experience to character and check for level up
+  # Add experience to active character and check for level up
   def awardXP(channel, name, experience)
-    @character = Character.find_by(name: name, channel: channel)    
+  #  @character = Character.find_by(name: name, channel: channel)    
     @character.xp += experience
 
     xpmsg = " #{@character.name} gains #{experience} xp!"
@@ -336,7 +337,7 @@ class CharactersController < ApplicationController
   end # end awardXP
 
   def getXPToNextLevel(level)
-    level*25 + 100 # implicit return
+    (level-1)*25 + 100 # implicit return
   end
 
 end # end Class
