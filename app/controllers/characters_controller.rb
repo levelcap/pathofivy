@@ -269,7 +269,7 @@ class CharactersController < ApplicationController
     @character = Character.find_by(name: name, channel: channel)    
     @character.xp += experience.to_i
     xpmsg = "#{experience} xp awarded to #{@character.name}"
-    if (@character.xp >= (@character.level-1)*25 + 100)
+    if (@character.xp >= getXPToNextLevel(@character.level) )
       @character.level += 1
       xpmsg += "\n#{@character.name} has reached level #{@character.level}!!"
       @character.xp = 0
