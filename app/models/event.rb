@@ -25,9 +25,9 @@ class Event
   @@currentStepIndex = 0
 
   def self.getCurrentEventStep
-    step = "#{@@stages[@@currentStageIndex][:steps][@@currentStepIndex]}"
+    step = "#{@@stages[@@currentStageIndex][@@currentStepIndex]}"
     @@currentStepIndex += 1
-    if (@@stages[@@currentStageIndex][:steps][@@currentStepIndex].nil?)
+    if (@@stages[@@currentStageIndex][@@currentStepIndex].nil?)
       @@currentStepIndex = 0
       @@currentStageIndex += 1
       if (@@stages[@@currentStageIndex].nil?)
