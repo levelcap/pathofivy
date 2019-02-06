@@ -31,15 +31,9 @@ class Event
     if (@@stages[@@currentStageIndex][@@currentStepIndex].nil?)
       @@currentStepIndex = 0
       @@currentStageIndex += 1
-      logger.info @@currentStageIndex
-      logger.info @@currentStepIndex
-      logger.info @@stages[@@currentStageIndex]
-      logger.info @@stages[@@currentStageIndex][@@currentStepIndex]
       if (@@stages[@@currentStageIndex].nil?)
-        logger.info @@stages
         @@currentStepIndex = 0
         @@currentStageIndex = 0
-        return "victory text!"
       end
     end
     return step
