@@ -31,12 +31,12 @@ class Event
     if (@@stages[@@currentStageIndex][@@currentStepIndex].nil?)
       @@currentStepIndex = 0
       @@currentStageIndex += 1
-      print @@currentStageIndex
-      print @@currentStepIndex
-      print @@stages[@@currentStageIndex]
-      print @@stages[@@currentStageIndex][@@currentStepIndex]
+      logger.info @@currentStageIndex
+      logger.info @@currentStepIndex
+      logger.info @@stages[@@currentStageIndex]
+      logger.info @@stages[@@currentStageIndex][@@currentStepIndex]
       if (@@stages[@@currentStageIndex].nil?)
-        print @@stages
+        logger.info @@stages
         @@currentStepIndex = 0
         @@currentStageIndex = 0
         return "victory text!"
