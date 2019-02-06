@@ -272,23 +272,26 @@ class CharactersController < ApplicationController
     name = params[:name]
     experience = params[:experience]
     @character = Character.find_by(name: name, channel: channel)    
-    @character.xp += experience.to_i
-    xpmsg = "#{experience} xp awarded to #{@character.name}"
-    if (@character.xp >= (@character.level-1)*25 + 100)
-      @character.level += 1
-      xpmsg += "\n#{@character.name} has reached level #{@character.level}!!"
-      @character.xp = 0
-    end
+    #@character.xp += experience.to_i
+    # xpmsg = "#{experience} xp awarded to #{@character.name} !"
+    xpmsg = awardXP(channel, @character.name, experience.to_i)
+    #if (@character.xp >= getXPToNextLevel(@character.level) )
+     # @character.level += 1
+      #xpmsg += " #{@character.name} has reached level #{@character.level} !!"
+      #@character.xp = 0
+    #end
     render plain: xpmsg
     @character.save
   end # end awardXPPublic
 
 
   private
+  
   def minutesSince(date)
     return ((date - DateTime.now) / 60).abs.round
   end # end minutesSince
 
+  # deprecated
   def awardBossLevels(channel)
     channelChars = Character.where(channel: channel).where("boss_damage > ?", 0).each do |char|
       bonusLevels = 1
