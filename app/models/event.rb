@@ -28,18 +28,12 @@ class Event
   def self.getCurrentEventStep
     step = "#{@@stages[@@currentStageIndex][@@currentStepIndex]}"
     @@currentStepIndex += 1
-    logger.info @@currentStageIndex
-    logger.info @@currentStepIndex
-    logger.info(@@stages[@@currentStageIndex][@@currentStepIndex])
-    logger.info("\n\n")
     if (@@stages[@@currentStageIndex][@@currentStepIndex].nil?)
       @@currentStepIndex = 0
       @@currentStageIndex += 1
       logger.info @@currentStageIndex
       logger.info @@currentStepIndex
-      logger.info("\n\n")
       logger.info @@stages[@@currentStageIndex]
-      logger.info("\n\n")
       logger.info @@stages[@@currentStageIndex][@@currentStepIndex]
       if (@@stages[@@currentStageIndex].nil?)
         logger.info @@stages
