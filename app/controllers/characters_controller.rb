@@ -281,10 +281,12 @@ class CharactersController < ApplicationController
 
 
   private
+  
   def minutesSince(date)
     return ((date - DateTime.now) / 60).abs.round
   end # end minutesSince
 
+  # deprecated
   def awardBossLevels(channel)
     channelChars = Character.where(channel: channel).where("boss_damage > ?", 0).each do |char|
       bonusLevels = 1
