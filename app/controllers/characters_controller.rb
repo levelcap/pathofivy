@@ -153,7 +153,7 @@ class CharactersController < ApplicationController
 
     ## Is there a special event running?
     if (@channel.special_event_running == true)
-      render plain: Event.getCurrentEventStep
+      render plain: "#{@character.name}#{Event.getCurrentEventStep}"
       return
     end
 
