@@ -58,9 +58,11 @@ class AdminController < ApplicationController
     if boss.nil?
       render plain: "No active boss"
     else
-      render plain: "Suddenly, a bolt of lightning streaks through the body of #{boss.name}, "\
-      "causing them to explode in a shower of shiny lights! As spectacular as it was, nobody "\
-      "really learned anything from the experience."
+      wipeSelect = Boss.getRandomRaidWipe(boss)
+      #wipeSelect = "Suddenly, a bolt of lightning streaks through the body of #{boss.name}, "\
+      #"causing them to explode in a shower of shiny lights! As spectacular as it was, nobody "\
+      #"really learned anything from the experience."
+      render plain: wipeSelect
       boss.active = false
       boss.save
       $timeOut = true
