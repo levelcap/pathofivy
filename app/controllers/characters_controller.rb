@@ -108,8 +108,17 @@ class CharactersController < ApplicationController
   end # end reportTopTrophies
 
   def show
-    channel = params[:channel].downcase
-    @character = Character.find_by(name: params[:id], channel: channel)
+    channelName = params[:channel].downcase
+    @channel = Channel.find_by(name: channelName)
+    if (@channel.nil?) 
+      @channel = Channel.new(
+        name: channelName,
+        special_event_running: false
+      )
+      @channel.save
+    end
+
+    @character = Character.find_by(name: params[:id], channel: channelName)
     if @character.nil?
       build = Questing.getRandomBuild
       @character = Character.new(
@@ -118,108 +127,104 @@ class CharactersController < ApplicationController
         level: 1,
         trophies: 0,
         description: 'It worked',
-        channel: channel,
+        channel: channelName,
         xp: 0
       )
       @character.save
       render plain: "#{@character.name} - a level 1 #{@character.build} - has started to walk the Path of Ivy!"
-    else
+      return
+    end
+    
+    # temporary compensation for no trophies field in case migration fucked up
+    if @character.trophies.nil?
+      @character.trophies = 0
+    end
 
-      # temporary compensation for no trophies field in case migration fucked up
-      if @character.trophies.nil?
-        @character.trophies = 0
-      end
-
-      if !@character.last_quest_date.nil?
-        minutesSinceLQ = minutesSince(@character.last_quest_date)
-        #minutesSinceLQ = 721 # for testing
-        if (minutesSinceLQ < 720 && $timeOut)
-          adventure = "#{@character.name}#{Questing.getRandomSleep}"
-          render plain: adventure
-          @character.save
-          return
-        end
-      end
-
-      ## Is there a boss active?
-      boss = Boss.find_by(active: true)
-      unless boss.nil?
-        ## Adds less swing to high level character damage, lets low level still deal satisfying damage
-        damage = [1, (@character.level + rand(-5..5))].max
-        health = boss.health - damage
-        boss.health = health;
-        if (health <= 0)
-          render plain: "#{boss.name} is bleeding all over the Path of Ivy. "\
-            "KAPOW #{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage, killing it dead! "\
-            "All fighters gain exp! Congratulations to #{@character.name} for landing the killing blow!"
-            @character.boss_damage += damage
-            awardtrophy = 1
-            @character.trophies += awardtrophy
-            @character.save            
-            boss.active = false
-            $timeOut = true
-          #awardBossLevels channel
-          awardBossXP(channel, boss.level)
-        else
-          output =  "#{boss.name} is RUINING the Path of Ivy for everyone. "\
-            "KAPOW #{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage!"
-          if (boss.health.to_f / boss.maxhealth.to_f) < 0.5
-            if (boss.health.to_f / boss.maxhealth.to_f) < 0.25
-              if (boss.health.to_f / boss.maxhealth.to_f) < 0.1
-                output += " #{boss.name} is on its last legs, if it even has legs! " # less than 10%
-              else
-                output += " #{boss.name} looks badly injured!" # less than 25%
-              end
-              
-            else
-              output += " #{boss.name} looks pretty hurt!" # less than 50%
-            end            
-          end
-
-          render plain: output
-          @character.boss_damage += damage
-          @character.save
-        end
-        boss.save
+    if !@character.last_quest_date.nil?
+      minutesSinceLQ = minutesSince(@character.last_quest_date)
+      #minutesSinceLQ = 721 # for testing
+      if (minutesSinceLQ < 720 && $timeOut)
+        adventure = "#{@character.name}#{Questing.getRandomSleep}"
+        render plain: adventure
+        @character.save
         return
-      end # end unless
-
-      ## Did we spawn a boss?
-      # roll_for_boss = rand 20
-      # if (roll_for_boss == 0)
-      #   boss = spawnBoss @character.level
-      #   render plain: "#{boss.description} appears on the Path of Ivy causing #{@character.name} to reel back in horror! "\
-      #       "This is the beast known as #{boss.name} and it will take all our strength to defeat!"
-      #   return
-      # end
-
-      ## Lets go on a random adventure and get exp!
-      @character.last_quest_date = DateTime.now
-      monster = Questing.getRandomMonster
-      
-      ## First few levels are failure free!
-      if @character.level <= 3
-        success_coinflip = 3
-      else
-        success_coinflip = rand 3
-      end      
-
-      if success_coinflip > 0
-        #@character.level = @character.level + 1        
-        adventure = "#{@character.name} the #{@character.build} went forth and #{Questing.getRandomAction} "\
-        "a #{monster}."         
-        adventure += awardXP(channel, @character.name, 100)    # change this away from a magic number sometime
-        
-      else
-        adventure = "#{@character.name} the #{@character.build} went forth and got #{Questing.getRandomAction} "\
-        "by a #{monster}. #{Questing.getRandomFail(@character)}"
       end
+    end
 
-      render plain: adventure
-      $timeOut = true 
-      @character.save
-    end # end else
+    ## Is there a special event running?
+    if (@channel.special_event_running == true)
+      render plain: Event.getCurrentEventStep
+      return
+    end
 
+    ## Is there a boss active?
+    boss = Boss.find_by(active: true)
+    unless boss.nil?
+      ## Adds less swing to high level character damage, lets low level still deal satisfying damage
+      damage = [1, (@character.level + rand(-5..5))].max
+      health = boss.health - damage
+      boss.health = health;
+      if (health <= 0)
+        render plain: "#{boss.name} is bleeding all over the Path of Ivy. "\
+          "KAPOW #{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage, killing it dead! "\
+          "All fighters gain exp! Congratulations to #{@character.name} for landing the killing blow!"
+          @character.boss_damage += damage
+          awardtrophy = 1
+          @character.trophies += awardtrophy
+          @character.save            
+          boss.active = false
+          $timeOut = true
+        #awardBossLevels channel
+        awardBossXP(channelName, boss.level)
+      else
+        output =  "#{boss.name} is RUINING the Path of Ivy for everyone. "\
+          "KAPOW #{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage!"
+        if (boss.health.to_f / boss.maxhealth.to_f) < 0.5
+          if (boss.health.to_f / boss.maxhealth.to_f) < 0.25
+            if (boss.health.to_f / boss.maxhealth.to_f) < 0.1
+              output += " #{boss.name} is on its last legs, if it even has legs! " # less than 10%
+            else
+              output += " #{boss.name} looks badly injured!" # less than 25%
+            end
+            
+          else
+            output += " #{boss.name} looks pretty hurt!" # less than 50%
+          end            
+        end
+
+        render plain: output
+        @character.boss_damage += damage
+        @character.save
+      end
+      boss.save
+      return
+    end # end unless
+
+    ## Lets go on a random adventure and get exp!
+    @character.last_quest_date = DateTime.now
+    monster = Questing.getRandomMonster
+    
+    ## First few levels are failure free!
+    if @character.level <= 3
+      success_coinflip = 3
+    else
+      success_coinflip = rand 3
+    end      
+
+    if success_coinflip > 0
+      #@character.level = @character.level + 1        
+      adventure = "#{@character.name} the #{@character.build} went forth and #{Questing.getRandomAction} "\
+      "a #{monster}."         
+      adventure += awardXP(channelName, @character.name, 100)    # change this away from a magic number sometime
+      
+    else
+      adventure = "#{@character.name} the #{@character.build} went forth and got #{Questing.getRandomAction} "\
+      "by a #{monster}. #{Questing.getRandomFail(@character)}"
+    end
+
+    render plain: adventure
+    $timeOut = true 
+    @character.save
   end # end show
 
   def faction

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_02_02_035013) do
+ActiveRecord::Schema.define(version: 2019_02_04_152757) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -25,6 +25,13 @@ ActiveRecord::Schema.define(version: 2019_02_02_035013) do
     t.string "channel", default: "ivyteapot"
     t.integer "level"
     t.integer "maxhealth"
+  end
+
+  create_table "channels", force: :cascade do |t|
+    t.string "name"
+    t.boolean "special_event_running"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "characters", force: :cascade do |t|
