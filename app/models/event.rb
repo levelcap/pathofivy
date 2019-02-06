@@ -17,7 +17,8 @@ class Event
         " overhears a random passerby discussing their weekend of sports-watching and the delicious bucket of hot wings they served. Hot wings? Wingz? Wagglewingz! Of course, the separatist leader has always coveted the power of Squidge! He used the raid as a distraction to steal the artifact!"
       ],
       [
-        " knows the Warrenz of Wagglewingz lie far to the west, through the Deathface Forests, over the Murdersea of Doom and down into the Crags of Bad Painful Stuff. Luckily they also know a teleportation spell, and helpfully bypass all of those terrible places for those looking to retrieve the Heartpillow!"
+        " knows the Warrenz of Wagglewingz lie far to the west, through the Deathface Forests, over the Murdersea of Doom and down into the Crags of Bad Painful Stuff. Luckily they also know a teleportation spell, and helpfully bypass all of those terrible places for those looking to retrieve the Heartpillow!",
+        " beats everyone up"
       ]
   ]
 
