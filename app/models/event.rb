@@ -18,7 +18,14 @@ class Event
       ],
       [
         " knows the Warrenz of Wagglewingz lie far to the west, through the Deathface Forests, over the Murdersea of Doom and down into the Crags of Bad Painful Stuff. Luckily they also know a teleportation spell, and helpfully bypass all of those terrible places for those looking to retrieve the Heartpillow!",
-        " beats everyone up",
+        " steps through the Shortcut but quickly finds that the Warrenz themselves are no joke! Giant znakez zlither from the underbrush and attack our hero, biting and fanging all over the place. They strike back against the scaley menaces with furious blows and are able to break free only slightly worse for wear.",
+        " does not have long to wonder what could be worse as they are set upon by dropbears, just droppin all over the place! A raised shield and a sturdy arm is enough to deflect most of the damage, and a quick moltenspear leaves only ashes where the threat once stood, but boy, this place is tiring.",
+        " whirls their blades like a super lawnmower as the trees themselves seem to press in, jagged branches snagging clothes and rending skin. Bits of bark and wood fly through the air and everyone wonders why nobody thought to bring eye protection. What would your shop teachers think?",
+        " casts Healinghug on their downtrodden companions, but the magic of friendship seems diminished in this dark place. Will our heroes be able to press on?",
+        " exhaustedly parries the gnarled fist of an ambushing Nightshriek Troll, then sets to dismembering the beast with leaden arms. They take a steadying breath and press forward, nothing must stop the recovery of the Heartpillow!",
+        " loses track of their companions what seems like a shifting maze of fog and branches. They call out into the empty night and hear only unsettling howls in reply. The glowing eyes that stare back from the darkness do not belong to anything friendly.",
+        " sacrifices themselves diving in front of the razored claws of a Spiketalon Devil. With their last breath they cast a curse that sends the creature screaming into the netherworld, but at what terrible cost?",
+        " leaps as a gaping pit suddenly opens at their feet, barely clearing the gap but having the briefest moment of victory before a red tentacle wraps around their ankle and yanks them down into formless depths. Seriously? What is the expected level of this stupid map?",
       ]
   ]
 
