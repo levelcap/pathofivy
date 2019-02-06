@@ -14,11 +14,11 @@ class Event
         " calls upon strange psychic powers by closing their eyes and placing fingers to the side of their head. Through the Veil come... sounds, sounds like... papers rustling? Frantic fanning? Wings flapping!",
         " nimbly climbs the walls and hangs from the ceiling to investigated the beautiful skylight that allows proper illumination of the Heartpillow and keeps it nice and warm for squidges. They find it not a skylight at all, but ajar!",
         " points out to everyone that there are also feathers all over the shrine so maybe that is a clue of some kind?",
-        " overhears a random passerby discussing their weekend of sports-watching and the delicious bucket of hot wings they served. Hot wings? Wingz? Wagglewingz! Of course, the separatist leader has always coveted the power of Squidge! He used the raid as a distraction to steal the artifact!"
+        " overhears a random passerby discussing their weekend of sports-watching and the delicious bucket of hot wings they served. Hot wings? Wingz? Wagglewingz! Of course, the separatist leader has always coveted the power of Squidge! He used the raid as a distraction to steal the artifact!",
       ],
       [
         " knows the Warrenz of Wagglewingz lie far to the west, through the Deathface Forests, over the Murdersea of Doom and down into the Crags of Bad Painful Stuff. Luckily they also know a teleportation spell, and helpfully bypass all of those terrible places for those looking to retrieve the Heartpillow!",
-        " beats everyone up"
+        " beats everyone up",
       ]
   ]
 
@@ -31,7 +31,12 @@ class Event
     if (@@stages[@@currentStageIndex][@@currentStepIndex].nil?)
       @@currentStepIndex = 0
       @@currentStageIndex += 1
+      print @@currentStageIndex
+      print @@currentStepIndex
+      print @@stages[@@currentStageIndex]
+      print @@stages[@@currentStageIndex][@@currentStepIndex]
       if (@@stages[@@currentStageIndex].nil?)
+        print @@stages
         @@currentStepIndex = 0
         @@currentStageIndex = 0
         return "victory text!"
