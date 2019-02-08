@@ -26,39 +26,48 @@ class Event
         " loses track of their companions what seems like a shifting maze of fog and branches. They call out into the empty night and hear only unsettling howls in reply. The glowing eyes that stare back from the darkness do not belong to anything friendly.",
         " sacrifices themselves diving in front of the razored claws of a Spiketalon Devil. With their last breath they cast a curse that sends the creature screaming into the netherworld, but at what terrible cost?",
         " leaps as a gaping pit suddenly opens at their feet, barely clearing the gap but having the briefest moment of victory before a red tentacle wraps around their ankle and yanks them down into formless depths. Seriously? What is the expected level of this stupid map?",
-      ]
+        " finally breaks through to the center of the Warrenz, covered in all manners of blood, their own, their friends', and just buckets of foes'. All that stands between them and victory is an enormous fortress occupied by rebel forces and the mighty Wagglewingz. Good. Good. Everything is fine.",
+      ],
+      [
+        " gathers their courage and approaches the imposing fortress of Wagglewingz. Taking a running start, they hurl themselves across the the Coffeemoat in an Olympian feat of leaping! The rancid caffeniated fumes filling their lungs give them a rush of energy, but that energy is obv supes evil.",
+        " stares up at the sheer walls of the fortress, extending up and up into the flat black night sky. With a put-upon sigh they ready grapples, hurl, and begin the arduous climb. A quarter of the way up, then half, nearly at the top and finally dragging themselves over to thump down on to the battlements.",
+        " crouches low and looks around. It is quiet - just the right amount of quiet, if one does not fancy being attacked by a mob of angry rebels. Striking out towards the heart of the fortress quickly reveals the reason for the eerie stillness; fallen bodies of rebels adorn the fortress halls, struck down with no mark of steel or spell.",
+        " notices a low droning hum coming from somewhere beneath the ground. They find a spiraling staircase leading down, down, down, and follow it as the skull-boring sound grows ever louder. By the time they reach the bottom, the hum is all they can hear, and a steady trickle of blood runs from their nostrils."
+        " steps over more fallen rebels on the way towards an imposing set of towering doors, inlaid with all sorts of skulls and like bones and devil horns and whatnot. Accompanying the maddening drone is a pulsing red light shining beneath those doors. They step closer, reaching out to grasp the handle and finding it icy cold to the touch."
+        " shouts a warning as the ominous doors burst open, too late to prevent them from sending allies flying into cold stone walls. Through the open doors oozes a blob of slurpingly sluggish impure thought. Wagglewingz has summoned the horror from beyond, the Sentient Thinksludge!"
+      ],
+      [
+        " summons a swarm of giant bees in an attempt to stem the tide of of the giant ooze. Wait, that isn't going to work. How would bees even.. OH NO the Thinksludge is already working against our heroes mental capacities!",
+        " planks. Remember planking? That was a pretty dumb trend and therefore fits well with the whole theme of this battle. They plank, quite droolingly, helping nobody ever.",
+        " demands to see the Sentient Thinksludge's manager. It technically has one, having been summoned to this plane by the dastardly Wagglewingz, but its glorping forward motion does not seem like acquiescence to this request.",
+        " pushes through the mental fog long enough to incorrectly attribute a quote to Oscar Wilde. That seems intelligent adjacent enough to bother the Thinksludge, which blorps, a sound we all know to be more distressed than a glorp!",
+        " leans into the encroaching stupidity and proclaims 'Let's kick some ice!' before halting the Thinksludge's glacial progress with a wave of magical frost.",
+        " piles on while the Thinksludge's influence has slowed, chipping away at the now icy monstrosity with massive swings of their warhammer.",
+        " fires bolts of pure arcane energy into the ceiling, bringing jagged chunks of stonework tumbling down on top of the Thinksludge, elicting shlorps of pain!",
+        " rushes into the opening provided as the Thinksludge writhes under the combined attack, striking a blow deep into its goopy heart and quipping to camera 'That's gotta smart!'. The Thinksludge trembles and then bursts, coating all present with a relatively harmless but utterly disgusting slime. The way to the inner chamber lies open!"
+      ],
+      [
+        " drags themself forward, despite wounds, mental fog and general exhaustion and despiar, to confront Wagglewingz in the heart of his own domain. There stands the great rebel leader, holding an ornate dagger high above the Heartpillow that everyone remembers we're trying to recover! Oh no!",
+        " yells 'Charge!' and all and sundry pull on the last of their reserves to surge forward towards the nefarious Wagglewingz as he slams the dagger home into the sacred Heartpillow. Blades and magic strike out as a brilliant white light shoots to the ceiling from where Wagglewingz' dagger pierced the artifact.",
+        " freezes in place as the white expands to encompass Wagglewingz, then the surrounding heroes, then the room and the the whoooooole world! Game over, man, game over!",
+      ],
   ]
 
   @@currentStageIndex = 0
   @@currentStepIndex = 0
 
-  def self.getCurrentEventStep
+  def self.getCurrentEventStep(channelName)
     step = "#{@@stages[@@currentStageIndex][@@currentStepIndex]}"
     @@currentStepIndex += 1
     if (@@stages[@@currentStageIndex][@@currentStepIndex].nil?)
       @@currentStepIndex = 0
       @@currentStageIndex += 1
       if (@@stages[@@currentStageIndex].nil?)
-        @@currentStepIndex = 0
-        @@currentStageIndex = 0
+        archiveChannel = "#{channelName}_archive_#{DateTime.now.strftime('%Y_%m_%d')}"
+        Channel.update_all({:name => channelName}, {:special_event_running => false})
+        Character.where(channel: channelName).update_all(channel: archiveChannel)
       end
     end
     return step
-  end
-
-  def self.getRandomAction
-    return @@actions.sample
-  end
-
-  def self.getRandomBuild
-    return @@elements.sample + @@modifiers.sample + ' ' + @@clazz.sample
-  end
-
-  def self.getRandomSleep
-    return @@tooSleepy.sample
-  end
-
-  def self.getRandomFail(character)
-    return @@failures.sample.sub("BUILD", character.build)
   end
 end
