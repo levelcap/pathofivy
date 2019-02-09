@@ -294,9 +294,17 @@ class CharactersController < ApplicationController
       end
       @character.xp = 0
       oldbuild = @character.build
-      newbuild = Questing.getRandomBuild
-      render plain: "#{@character.name}, after hours of extensive training, rigorous study, sharp focus, and copious amounts of tea drinking, "\
+      if @character.name.downcase === "hellasweetcool" # *evil laughter*
+        newbuild = "Lovemuffin Archer"
+        @character.level += 2 # don't mess his levels up at least
+        render plain: "#{@character.name}, you thought and thought and thought about it, but eventually decided you loved being a #{oldbuild} so much you couldn't bear to switch away!"
+        
+      else
+        newbuild = Questing.getRandomBuild
+        render plain: "#{@character.name}, after hours of extensive training, rigorous study, sharp focus, and copious amounts of tea drinking, "\
       "you have transformed yourself from a #{oldbuild} to a #{newbuild}!!"
+      end
+      
       @character.build = newbuild
       @character.save
     end

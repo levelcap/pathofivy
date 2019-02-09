@@ -12,6 +12,12 @@ class AdminController < ApplicationController
     end
   end
 
+  def resetQuestTimeouts
+    channel = params[:channel]
+    Character.where(channel: channel).update_all(last_quest_date: nil)
+    render plain: "All questing timeouts have been reset! You may quest again as soon as you're done with your tea!"
+  end
+
   def bossFight
     level = params[:level].to_i
     $timeOut = false
