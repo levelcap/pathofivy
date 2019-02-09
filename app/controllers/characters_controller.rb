@@ -153,7 +153,9 @@ class CharactersController < ApplicationController
 
     ## Is there a special event running?
     if (@channel.special_event_running == true)
-      render plain: "#{@character.name}#{Event.getCurrentEventStep}"
+      render plain: "#{@character.name}#{Event.getCurrentEventStep(channelName)}"
+      @character.last_quest_date = DateTime.now
+      @character.save
       return
     end
 
