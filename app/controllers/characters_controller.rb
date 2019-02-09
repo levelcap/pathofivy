@@ -131,7 +131,7 @@ class CharactersController < ApplicationController
         xp: 0
       )
       @character.save
-      render plain: "#{@character.name} - a level 1 #{@character.build} - has started to walk the Path of Ivy! Type !pathofivy again to go on your first quest!"
+      render plain: "#{@character.name} - a level 1 #{@character.build} - has started to walk the Path of Ivy! Type !pathofivy again to go on your first quest!" 
       return
     end
     
