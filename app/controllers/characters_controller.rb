@@ -141,8 +141,8 @@ class CharactersController < ApplicationController
     end
 
     if !@character.last_quest_date.nil?
-      minutesSinceLQ = minutesSince(@character.last_quest_date)
-      #minutesSinceLQ = 721 # for testing
+      #minutesSinceLQ = minutesSince(@character.last_quest_date)
+      minutesSinceLQ = 721 # for testing
       if (minutesSinceLQ < 720 && $timeOut)
         adventure = "#{@character.name}#{Questing.getRandomSleep}"
         render plain: adventure
@@ -215,13 +215,23 @@ class CharactersController < ApplicationController
 
     if success_coinflip > 0
       #@character.level = @character.level + 1        
-      adventure = "#{@character.name} the #{@character.build} went forth and #{Questing.getRandomAction} "\
-      "a #{monster}."         
+      adventure = "#{@character.name} the #{@character.build} went forth and #{Questing.getRandomAction} "
+      if (monster[0].count "AEIOUaeiou") > 0
+        adventure += "an "
+      else
+        adventure += "a "
+      end
+      adventure += "#{monster}."         
       adventure += awardXP(channelName, @character.name, 100)    # change this away from a magic number sometime
       
     else
-      adventure = "#{@character.name} the #{@character.build} went forth and got #{Questing.getRandomAction} "\
-      "by a #{monster}. #{Questing.getRandomFail(@character)}"
+      adventure = "#{@character.name} the #{@character.build} went forth and got #{Questing.getRandomAction} by "
+      if (monster[0].count "AEIOUaeiou") > 0
+        adventure += "an "
+      else
+        adventure += "a "
+      end
+      adventure += "#{monster}. #{Questing.getRandomFail(@character)}"
     end
 
     render plain: adventure
@@ -286,7 +296,7 @@ class CharactersController < ApplicationController
       oldbuild = @character.build
       newbuild = Questing.getRandomBuild
       render plain: "#{@character.name}, after hours of extensive training, rigorous study, sharp focus, and copious amounts of tea drinking, "\
-      "you have transformed yourself from a #{oldbuild} to a #{newbuild} !!"
+      "you have transformed yourself from a #{oldbuild} to a #{newbuild}!!"
       @character.build = newbuild
       @character.save
     end
