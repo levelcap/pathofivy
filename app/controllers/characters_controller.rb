@@ -268,6 +268,30 @@ class CharactersController < ApplicationController
 
   end # end faction
 
+  # spend levels to reroll your class
+  def rerollClass
+    channel = params[:channel].downcase
+    name = params[:name]
+    levelreq = 2
+    @character = Character.find_by(name: name, channel: channel)
+    if @character.level < levelreq
+      render plain: "#{@character.name}, you aren't high enough level to reroll your class! (Level #{levelreq})"
+      return
+    else
+      @character.level -= 2
+      if @character.level === 0
+        @character.level = 1
+      end
+      @character.xp = 0
+      oldbuild = @character.build
+      newbuild = Questing.getRandomBuild
+      render plain: "#{@character.name}, after hours of extensive training, rigorous study, sharp focus, and copious amounts of tea drinking, "\
+      "you have transformed yourself from a #{oldbuild} to a #{newbuild} !!"
+      @character.build = newbuild
+      @character.save
+    end
+  end
+
   # Add experience to character and check for level up - publicly accessible in case streamer wants to add xp to someone
   def awardXPPublic
     channel = params[:channel].downcase

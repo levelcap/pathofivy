@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   get '/characters/:name/faction', to: 'characters#faction'
   get '/characters/:channel/:name/sheet', to: 'characters#sheet'
   get '/characters/:channel/:name/report', to: 'characters#report'
+  get '/characters/:channel/:name/reroll', to: 'characters#rerollClass'
   get '/characters/:channel/xp', to: 'characters#awardXPPublic'
   get '/characters/:channel/reportboss', to: 'characters#reportBoss'
   get '/characters/:channel/reporttrophies', to: 'characters#reportTopTrophies'
