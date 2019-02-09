@@ -282,7 +282,7 @@ class CharactersController < ApplicationController
   def rerollClass
     channel = params[:channel].downcase
     name = params[:name]
-    levelreq = 1
+    levelreq = 2
     @character = Character.find_by(name: name, channel: channel)
     if @character.level < levelreq
       render plain: "#{@character.name}, you aren't high enough level to reroll your class! (Level #{levelreq})"
@@ -296,7 +296,7 @@ class CharactersController < ApplicationController
       oldbuild = @character.build
       if @character.name.downcase === "hellasweetcool" # *evil laughter*
         newbuild = "Lovemuffin Archer"
-        @character.level = 3 # don't mess his levels up at least
+        @character.level += 2 # don't mess his levels up at least
         render plain: "#{@character.name}, you thought and thought and thought about it, but eventually decided you loved being a #{oldbuild} so much you couldn't bear to switch away!"
 
       else
