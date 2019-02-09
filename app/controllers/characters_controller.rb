@@ -141,8 +141,8 @@ class CharactersController < ApplicationController
     end
 
     if !@character.last_quest_date.nil?
-      #minutesSinceLQ = minutesSince(@character.last_quest_date)
-      minutesSinceLQ = 721 # for testing
+      minutesSinceLQ = minutesSince(@character.last_quest_date)
+      #minutesSinceLQ = 721 # for testing
       if (minutesSinceLQ < 720 && $timeOut)
         adventure = "#{@character.name}#{Questing.getRandomSleep}"
         render plain: adventure
