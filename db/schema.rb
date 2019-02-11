@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_02_04_152757) do
+ActiveRecord::Schema.define(version: 2019_02_11_185401) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -32,6 +32,8 @@ ActiveRecord::Schema.define(version: 2019_02_04_152757) do
     t.boolean "special_event_running"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "current_stage_index", default: 0
+    t.integer "current_step_index", default: 0
   end
 
   create_table "characters", force: :cascade do |t|
