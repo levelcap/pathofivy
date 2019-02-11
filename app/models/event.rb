@@ -53,21 +53,24 @@ class Event
       ],
   ]
 
-  @@currentStageIndex = 0
-  @@currentStepIndex = 0
-
   def self.getCurrentEventStep(channelName)
-    step = "#{@@stages[@@currentStageIndex][@@currentStepIndex]}"
-    @@currentStepIndex += 1
-    if (@@stages[@@currentStageIndex][@@currentStepIndex].nil?)
-      @@currentStepIndex = 0
-      @@currentStageIndex += 1
-      if (@@stages[@@currentStageIndex].nil?)
+    channel = Channel.find_by(name: channelName)
+    currentStageIndex = channel.current_stage_index
+    currentStepIndex = channel.current_step_index
+    step = "#{@@stages[currentStageIndex][currentStepIndex]}"
+    currentStepIndex += 1
+    if (@@stages[currentStageIndex][currentStepIndex].nil?)
+      currentStepIndex = 0
+      currentStageIndex += 1
+      if (@@stages[currentStageIndex].nil?)
         archiveChannel = "#{channelName}_archive_#{DateTime.now.strftime('%Y_%m_%d')}"
         Channel.update_all({:name => channelName}, {:special_event_running => false})
         Character.where(channel: channelName).update_all(channel: archiveChannel)
       end
     end
+    channel.current_stage_index = currentStageIndex
+    channel.current_step_index = currentStepIndex
+    channel.save
     return step
   end
 end
