@@ -58,4 +58,180 @@ class Questing
   def self.getRandomFail(character)
     return @@failures.sample.sub("BUILD", character.build)
   end
+
+  def self.allQuestingLogic(params)
+    channelName = params[:channel].downcase
+    @channel = Channel.find_by(name: channelName)
+    if (@channel.nil?) 
+      @channel = Channel.new(
+        name: channelName,
+        special_event_running: false
+      )
+      @channel.save
+    end
+
+    @character = Character.find_by(name: params[:id], channel: channelName)
+    if @character.nil?
+      build = Questing.getRandomBuild
+      @character = Character.new(
+        name: params[:id],
+        build: build,
+        level: 1,
+        trophies: 0,
+        description: 'It worked',
+        channel: channelName,
+        xp: 0
+      )
+      @character.save
+      return "#{@character.name} - a level 1 #{@character.build} - has started to walk the Path of Ivy! Type !pathofivy again to go on your first quest!" 
+    end
+    
+    # temporary compensation for no trophies field in case migration fucked up
+    if @character.trophies.nil?
+      @character.trophies = 0
+    end
+
+    if !@character.last_quest_date.nil?
+      minutesSinceLQ = minutesSince(@character.last_quest_date)
+      #minutesSinceLQ = 721 # for testing
+      if (minutesSinceLQ < 720 && $timeOut)
+        adventure = "#{@character.name}#{Questing.getRandomSleep}"
+        @character.save
+        return adventure
+      end
+    end
+
+    ## Is there a special event running?
+    if (@channel.special_event_running == true)
+      @character.last_quest_date = DateTime.now
+      @character.save
+      return "#{@character.name}#{Event.getCurrentEventStep(channelName)}"
+    end
+
+    ## Is there a boss active?
+    boss = Boss.find_by(active: true)
+    unless boss.nil?
+      output = ""
+      ## Adds less swing to high level character damage, lets low level still deal satisfying damage
+      damage = [1, (@character.level + rand(-5..5))].max
+      health = boss.health - damage
+      boss.health = health;
+      if (health <= 0)
+        output = "#{boss.name} is bleeding all over the Path of Ivy. "\
+          "KAPOW #{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage, killing it dead! "\
+          "All fighters gain exp! Congratulations to #{@character.name} for landing the killing blow!"
+        @character.boss_damage += damage
+        awardtrophy = 1
+        @character.trophies += awardtrophy
+        @character.save            
+        boss.active = false
+        $timeOut = true
+        awardBossXP(channelName, boss.level)
+      else
+        output = "#{boss.name} is RUINING the Path of Ivy for everyone. "\
+          "KAPOW #{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage!"
+        if (boss.health.to_f / boss.maxhealth.to_f) < 0.5
+          if (boss.health.to_f / boss.maxhealth.to_f) < 0.25
+            if (boss.health.to_f / boss.maxhealth.to_f) < 0.1
+              output += " #{boss.name} is on its last legs, if it even has legs! " # less than 10%
+            else
+              output += " #{boss.name} looks badly injured!" # less than 25%
+            end  
+          else
+            output += " #{boss.name} looks pretty hurt!" # less than 50%
+          end            
+        end
+        @character.boss_damage += damage
+        @character.save
+      end
+      boss.save
+      return output
+    end # end unless
+
+    ## Lets go on a random adventure and get exp!
+    @character.last_quest_date = DateTime.now
+    monster = Questing.getRandomMonster
+    
+    ## First few levels are failure free!
+    if @character.level <= 3
+      success_coinflip = 3
+    else
+      success_coinflip = rand 3
+    end      
+
+    if success_coinflip > 0
+      #@character.level = @character.level + 1        
+      adventure = "#{@character.name} the #{@character.build} went forth and #{Questing.getRandomAction} "
+      if (monster[0].count "AEIOUaeiou") > 0
+        adventure += "an "
+      else
+        adventure += "a "
+      end
+      adventure += "#{monster}."         
+      # TODO: change this away from a magic number
+      adventure += awardXP(channelName, @character.name, 100)
+      
+    else
+      adventure = "#{@character.name} the #{@character.build} went forth and got #{Questing.getRandomAction} by "
+      if (monster[0].count "AEIOUaeiou") > 0
+        adventure += "an "
+      else
+        adventure += "a "
+      end
+      adventure += "#{monster}. #{Questing.getRandomFail(@character)}"
+    end
+    $timeOut = true 
+    @character.save
+    return adventure
+  end
+
+  private
+    
+  def self.minutesSince(date)
+    return ((date - DateTime.now) / 60).abs.round
+  end # end minutesSince
+  
+  # award XP to block of characters that participated in the boss fight
+  def self.awardBossXP(channel, bossLevel)
+    channelChars = Character.where(channel: channel).where("boss_damage > ?", 0).each do |char|
+    
+      playerLevelDiff = bossLevel - char.level
+      if (playerLevelDiff < -5)
+        experiences = bossLevel*2
+      elsif (playerLevelDiff < 5)
+        experiences = bossLevel*10
+      elsif (playerLevelDiff >= 5)
+        experiences = bossLevel*50
+      end
+
+    awardXP(channel, char.name, experiences)
+    char.boss_damage = 0
+    char.save
+    
+    end # end block
+  end # end awardBossXP
+
+  # Add experience to active character and check for level up
+  def self.awardXP(channel, name, experience)
+  #  @character = Character.find_by(name: name, channel: channel)    
+    @character.xp += experience
+
+    xpmsg = " #{@character.name} gains #{experience} xp!"
+    
+    #if (@character.xp >= (@character.level-1)*25 + 100)
+    if (@character.xp >= getXPToNextLevel(@character.level) )
+      @character.level += 1
+      xpmsg += " #{@character.name} has reached level #{@character.level}!!"
+      @character.xp = 0
+    end
+
+    @character.save
+      
+    xpmsg # implicit return
+    
+  end # end awardXP
+
+  def self.getXPToNextLevel(level)
+    (level-1)*25 + 100 # implicit return
+  end
 end
