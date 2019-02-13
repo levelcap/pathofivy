@@ -59,8 +59,9 @@ class Questing
     return @@failures.sample.sub("BUILD", character.build)
   end
 
-  def self.allQuestingLogic(params)
-    channelName = params[:channel].downcase
+  def self.allQuestingLogic(channelName, user)
+    channelName = channelName.downcase
+    # TODO: This is general initialization, not quest specific, move that shit to application_controller somewhere
     @channel = Channel.find_by(name: channelName)
     if (@channel.nil?) 
       @channel = Channel.new(
@@ -70,11 +71,12 @@ class Questing
       @channel.save
     end
 
-    @character = Character.find_by(name: params[:id], channel: channelName)
+    @character = Character.find_by(name: user, channel: channelName)
+    # TODO: We can probably get rid of the description field if we're not going to use it
     if @character.nil?
       build = Questing.getRandomBuild
       @character = Character.new(
-        name: params[:id],
+        name: user,
         build: build,
         level: 1,
         trophies: 0,
@@ -86,14 +88,16 @@ class Questing
       return "#{@character.name} - a level 1 #{@character.build} - has started to walk the Path of Ivy! Type !pathofivy again to go on your first quest!" 
     end
     
-    # temporary compensation for no trophies field in case migration fucked up
+    # temporary compensation for no trophies field in case migration fucked up. Remove after character wipe
     if @character.trophies.nil?
       @character.trophies = 0
     end
 
+    # TODO:
+    # - Move timeout timer to Channel model
+    # - Allow timer to compare against stream start time rather than raw minutes
     if !@character.last_quest_date.nil?
       minutesSinceLQ = minutesSince(@character.last_quest_date)
-      #minutesSinceLQ = 721 # for testing
       if (minutesSinceLQ < 720 && $timeOut)
         adventure = "#{@character.name}#{Questing.getRandomSleep}"
         @character.save
@@ -111,7 +115,36 @@ class Questing
     ## Is there a boss active?
     boss = Boss.find_by(active: true)
     unless boss.nil?
-      output = ""
+      
+    end # end unless
+
+    ## Lets go on a random adventure and get exp!
+    @character.last_quest_date = DateTime.now
+    monster = Questing.getRandomMonster
+    
+    ## First few levels are failure free!
+    if @character.level <= 3
+      success_coinflip = 3
+    else
+      success_coinflip = rand 3
+    end      
+
+    if success_coinflip > 0  
+      adventure = "#{@character.name} the #{@character.build} went forth and #{Questing.getRandomAction} #{monsterArticle(monster)}#{monster}"
+      adventure += "."         
+      # TODO: change this away from a magic number
+      adventure += awardXP(channelName, @character.name, 100)
+    else
+      adventure = "#{@character.name} the #{@character.build} went forth and got #{Questing.getRandomAction} by #{monsterArticle(monster)}#{monster}. #{Questing.getRandomFail(@character)}"
+    end
+    $timeOut = true 
+    @character.save
+    return adventure
+  end
+
+  private
+  def self.attackBoss() 
+    output = ""
       ## Adds less swing to high level character damage, lets low level still deal satisfying damage
       damage = [1, (@character.level + rand(-5..5))].max
       health = boss.health - damage
@@ -130,63 +163,28 @@ class Questing
       else
         output = "#{boss.name} is RUINING the Path of Ivy for everyone. "\
           "KAPOW #{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage!"
-        if (boss.health.to_f / boss.maxhealth.to_f) < 0.5
-          if (boss.health.to_f / boss.maxhealth.to_f) < 0.25
-            if (boss.health.to_f / boss.maxhealth.to_f) < 0.1
-              output += " #{boss.name} is on its last legs, if it even has legs! " # less than 10%
-            else
-              output += " #{boss.name} looks badly injured!" # less than 25%
-            end  
-          else
-            output += " #{boss.name} looks pretty hurt!" # less than 50%
-          end            
+        if (boss.health.to_f / boss.maxhealth.to_f) < 0.1
+          output += " #{boss.name} is on its last legs, if it even has legs!"
+        elsif (boss.health.to_f / boss.maxhealth.to_f) < 0.25
+          output += " #{boss.name} looks badly injured, like in a gross way, ick the consequences of violence!"
+        elsif (boss.health.to_f / boss.maxhealth.to_f) < 0.5
+          output += " #{boss.name} looks pretty hurt, making it even uglier than it already was!"
+        else
+          output += " #{boss.name} is taking these hits like an absolute champ the madla..thing!"  
         end
         @character.boss_damage += damage
         @character.save
       end
       boss.save
       return output
-    end # end unless
-
-    ## Lets go on a random adventure and get exp!
-    @character.last_quest_date = DateTime.now
-    monster = Questing.getRandomMonster
-    
-    ## First few levels are failure free!
-    if @character.level <= 3
-      success_coinflip = 3
-    else
-      success_coinflip = rand 3
-    end      
-
-    if success_coinflip > 0
-      #@character.level = @character.level + 1        
-      adventure = "#{@character.name} the #{@character.build} went forth and #{Questing.getRandomAction} "
-      if (monster[0].count "AEIOUaeiou") > 0
-        adventure += "an "
-      else
-        adventure += "a "
-      end
-      adventure += "#{monster}."         
-      # TODO: change this away from a magic number
-      adventure += awardXP(channelName, @character.name, 100)
-      
-    else
-      adventure = "#{@character.name} the #{@character.build} went forth and got #{Questing.getRandomAction} by "
-      if (monster[0].count "AEIOUaeiou") > 0
-        adventure += "an "
-      else
-        adventure += "a "
-      end
-      adventure += "#{monster}. #{Questing.getRandomFail(@character)}"
-    end
-    $timeOut = true 
-    @character.save
-    return adventure
+  end
+  def self.monsterArticle(monster)
+    if (monster[0].count "AEIOUaeiou") > 0
+      return "an "
+    end 
+    return "a "
   end
 
-  private
-    
   def self.minutesSince(date)
     return ((date - DateTime.now) / 60).abs.round
   end # end minutesSince
