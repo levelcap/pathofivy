@@ -22,6 +22,15 @@ class ApplicationController < ActionController::Base
       render plain: "nope"
       return
     end
+
+    @channel = Channel.find_by(name: channel)
+    if (@channel.nil?) 
+      @channel = Channel.new(
+        name: channelName,
+        special_event_running: false
+      )
+      @channel.save
+    end
   end
 
   def spawnBoss(level)

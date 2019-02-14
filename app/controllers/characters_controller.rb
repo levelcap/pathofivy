@@ -108,9 +108,10 @@ class CharactersController < ApplicationController
   end # end reportTopTrophies
 
   def show
-    adventure = Questing.allQuestingLogic(params)
+    questing = Questing.new(params[:id], params[:channel])
+    adventure = questing.doQuest
     render plain: adventure
-  end # end show
+  end
 
   def faction
     channel = params[:channel].downcase
@@ -185,71 +186,9 @@ class CharactersController < ApplicationController
 
   # Add experience to character and check for level up - publicly accessible in case streamer wants to add xp to someone
   def awardXPPublic
-    channel = params[:channel].downcase
-    name = params[:name]
+    questing = Questing.new(params[:name], params[:channel])
     experience = params[:experience]
-    @character = Character.find_by(name: name, channel: channel)    
-    #@character.xp += experience.to_i
-    # xpmsg = "#{experience} xp awarded to #{@character.name} !"
-    xpmsg = awardXP(channel, @character.name, experience.to_i)
-    #if (@character.xp >= getXPToNextLevel(@character.level) )
-     # @character.level += 1
-      #xpmsg += " #{@character.name} has reached level #{@character.level} !!"
-      #@character.xp = 0
-    #end
+    xpmsg = questing.awardXP(channel, @character.name, experience.to_i)
     render plain: xpmsg
-    @character.save
-  end # end awardXPPublic
-
-
-  private
-  
-  def minutesSince(date)
-    return ((date - DateTime.now) / 60).abs.round
-  end # end minutesSince
-
-  # award XP to block of characters that participated in the boss fight
-  def awardBossXP(channel, bossLevel)
-    channelChars = Character.where(channel: channel).where("boss_damage > ?", 0).each do |char|
-    
-      playerLevelDiff = bossLevel - char.level
-      if (playerLevelDiff < -5)
-        experiences = bossLevel*2
-      elsif (playerLevelDiff < 5)
-        experiences = bossLevel*10
-      elsif (playerLevelDiff >= 5)
-        experiences = bossLevel*50
-      end
-
-    awardXP(channel, char.name, experiences)
-    char.boss_damage = 0
-    char.save
-    
-    end # end block
-  end # end awardBossXP
-
-  # Add experience to active character and check for level up
-  def awardXP(channel, name, experience)
-  #  @character = Character.find_by(name: name, channel: channel)    
-    @character.xp += experience
-
-    xpmsg = " #{@character.name} gains #{experience} xp!"
-    
-    #if (@character.xp >= (@character.level-1)*25 + 100)
-    if (@character.xp >= getXPToNextLevel(@character.level) )
-      @character.level += 1
-      xpmsg += " #{@character.name} has reached level #{@character.level}!!"
-      @character.xp = 0
-    end
-
-    @character.save
-      
-    xpmsg # implicit return
-    
-  end # end awardXP
-
-  def getXPToNextLevel(level)
-    (level-1)*25 + 100 # implicit return
   end
-
-end # end Class
+end
