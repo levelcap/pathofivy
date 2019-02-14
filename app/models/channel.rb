@@ -1,8 +1,5 @@
 class Channel < ApplicationRecord
   def getTrophies(num)
-    x = 0
-    y = 0
-    trophylist = []
     output = "The top Path of Ivy warriors: "
    
     # make ordered list of number of trophies that appear
