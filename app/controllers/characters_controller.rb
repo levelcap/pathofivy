@@ -21,23 +21,10 @@ class CharactersController < ApplicationController
   def report
     channel = params[:channel].downcase
     name = params[:name]
-    @character = Character.find_by(name: name, channel: channel)
-    xpToNextLevel = getXPToNextLevel(@character.level)
-
-    if @character.trophies.nil?
-      @character.trophies = 0
-    end
-    output = "#{@character.name} is a level #{@character.level} #{@character.build} with #{@character.trophies} boss "\
     
-    if (@character.trophies === 1)
-      output += "trophy"
-    else
-      output += "trophies"
-    end
-    
-    output += " and has #{@character.xp}/#{xpToNextLevel} xp to the next level. "
+    output = Character.find_by(name: name, channel: channel).getReport
     render plain: output
-  end # end report
+  end
 
   def reportBoss
     boss = Boss.find_by(active: true)
@@ -49,62 +36,11 @@ class CharactersController < ApplicationController
   end
 
   def reportTopTrophies
-    channel = params[:channel].downcase
+    channelName = params[:channel].downcase
     num = params[:num].to_i
-    #num = 5
-    x = 0
-    y = 0
-    trophylist = []
-    output = ""
-   
-    # make ordered list of number of trophies that appear
-    topTrophies = Character.where(channel: channel).where("trophies > ?", 0).each do |tlist|
-     trophylist << tlist.trophies
-    end
-    
-    trophylist.sort! { |x,y| y <=> x} # use sort! to sort in place rather than create new array or it doesn't work
-
-    if trophylist.length > 0
-      trophylist = trophylist.uniq.first(num)
-    end
-    #output += "trophylist = #{trophylist} num = #{num} "
-    # identify all players having trophy counts matching elements of built-up array and form output string
-    topTrophies = Character.where(channel: channel).where("trophies > ?", 0)
-
-    if topTrophies.length <= 0
-      output = "Nobody has any trophies!"
-      render plain: output # investigate removing this early return
-      return
-    else
-      output += "The top Path of Ivy warriors: "
-      
-      # go through all characters and make arrays of characters that have that many trophies
-      trophylist.each do |tlist|
-        taggedChars = Character.where(channel: channel).where("trophies = ?", trophylist[x]).order(:name).sort # do we need .sort?
-        if tlist == 1
-          output += "With #{tlist} trophy: "
-        else
-          output += "With #{tlist} trophies: "
-        end
-
-        # go through compiled array and build a string
-        y = 0
-        while y < taggedChars.length
-          
-          if y === taggedChars.length-1
-            output += "#{taggedChars[y].name}. "
-          else
-            output += "#{taggedChars[y].name}, "
-          end
-          y += 1
-        end # end while
-        x += 1
-      end # end until
-
-    end # end if-else
+    output = Channel.find_by(name: channelName).getTrophies(num)
 
     render plain: output
-
   end # end reportTopTrophies
 
   def show

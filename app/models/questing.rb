@@ -39,6 +39,9 @@ class Questing
     "They have gone home, and brought great shame upon their family."
   ]
   
+  attr_reader :character
+  attr_reader :channel
+
   def initialize(user, channelName)
     channelName.downcase!
     @character = Character.find_by(name: user, channel: channelName)
@@ -104,7 +107,7 @@ class Questing
         @character.save            
         @boss.active = false
         $timeOut = true
-        awardBossXP(@channel.name, @boss.level)
+        awardBossXP(@boss.level)
       else
         output = "#{@boss.name} is RUINING the Path of Ivy for everyone. "\
           "KAPOW #{@character.name} #{getRandomAction} #{@boss.name} for #{damage} damage!"
@@ -152,6 +155,10 @@ class Questing
     return @@elements.sample + @@modifiers.sample + ' ' + @@clazz.sample
   end
 
+  def self.getXPToNextLevel(level)
+    (level - 1) * 25 + 100
+  end
+
   private
   def getRandomMonster
     return "#{@@elements.sample}#{@@monsterPart.sample} #{@@monsterType.sample}"
@@ -185,8 +192,8 @@ class Questing
   end
   
   # award XP to block of characters that participated in the boss fight
-  def awardBossXP(channel, bossLevel)
-    channelChars = Character.where(channel: channel).where("boss_damage > ?", 0).each do |char|
+  def awardBossXP(bossLevel)
+    channelChars = Character.where(channel: @channel.name).where("boss_damage > ?", 0).each do |char|
       playerLevelDiff = bossLevel - char.level
       if (playerLevelDiff < -5)
         experiences = bossLevel*2
@@ -202,21 +209,19 @@ class Questing
   end
 
   # Add experience to active character and check for level up
-  def awardXP(experience)
-    @character.xp += experience
-    xpmsg = " #{@character.name} gains #{experience} xp!"
+  def awardXP(experience, xpchar: nil)
+    if (xpchar.nil?)
+      xpchar = @character
+      xpchar.xp += experience
+    xpmsg = " #{xpchar.name} gains #{experience} xp!"
     
-    if (@character.xp >= getXPToNextLevel(@character.level) )
-      @character.level += 1
-      xpmsg += " #{@character.name} has reached level #{@character.level}!!"
-      @character.xp = 0
+    if (xpchar.xp >= getXPToNextLevel(@character.level) )
+      xpchar.level += 1
+      xpmsg += " #{xpchar.name} has reached level #{xpchar.level}!!"
+      xpchar.xp = 0
     end
 
-    @character.save
+    xpchar.save
     xpmsg
-  end
-
-  def self.getXPToNextLevel(level)
-    (level - 1) * 25 + 100
   end
 end
