@@ -71,8 +71,10 @@ class CharactersController < ApplicationController
 
   # Add experience to character and check for level up - publicly accessible in case streamer wants to add xp to someone
   def awardXPPublic
-    questing = Questing.new(params[:name], params[:channel])
+    channel = params[:channel].downcase
+    name = params[:name]
     experience = params[:experience]
+    questing = Questing.new(name, channel)
     render plain: questing.awardXP(experience.to_i)
   end
 end
