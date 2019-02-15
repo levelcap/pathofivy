@@ -24,20 +24,19 @@ class BotCommand
 
   def start
     @running = true
-    # Thread.start do
-    #   talkToMe
-    # end
+    Thread.start do
+      talkToMe
+    end
     Thread.start do
       print "Connected to chat!\n"
       print "#{BOTNAME} Joined ##{CHANNEL}"
       while (@running) do
         ready = IO.select([@socket])
         ready[0].each do |s|
-          while line = s.gets
-            unless line.nil?
-              pp line
-              parseLine(line)
-            end
+          line = s.gets
+          unless line.nil?
+            pp line
+            parseLine(line)
           end
         end
       end
@@ -85,13 +84,13 @@ class BotCommand
   end
 
   def handleCommands(user, message)
-    # if (message.start_with? "!newpath")
-    #   questing = Questing.new(user, @channelName)
-    #   adventure = questing.doQuest
-    #   sendChannelMessage(adventure)
-    # elsif (message.start_with? "!otherthing")
-    #   sendChannelMessage("Hi there this is the other thing")
-    # end
+    if (message.start_with? "!newpath")
+      questing = Questing.new(user, @channelName)
+      adventure = questing.doQuest
+      sendChannelMessage(adventure)
+    elsif (message.start_with? "!otherthing")
+      sendChannelMessage("Hi there this is the other thing")
+    end
   end
   
   def sendChannelMessage(message)
@@ -100,7 +99,7 @@ class BotCommand
 
   def fetchTwitchViewers
     begin
-      json = HTTParty.get('http://tmi.twitch.tv/group/user/ivyteapot/chatters')
+      json = HTTParty.get("http://tmi.twitch.tv/group/user/#{@channelName}/chatters")
       if json
         response = JSON.parse(json.body)["chatters"]
         return response["viewers"]
