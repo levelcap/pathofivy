@@ -47,7 +47,7 @@ class Questing
     @character = Character.find_by(name: user, channel: channelName)
     # TODO: We can probably get rid of the description field if we're not going to use it
     if @character.nil?
-      build = getRandomBuild
+      build = Questing.getRandomBuild
       @character = Character.new(
         name: user,
         build: build,
@@ -142,7 +142,7 @@ class Questing
       adventure = "#{@character.name} the #{@character.build} went forth and #{getRandomAction} #{monsterArticle(monster)}#{monster}"
       adventure += "."         
       # TODO: change this away from a magic number
-      adventure += awardXP(@channel.name, @character.name, 100)
+      adventure += awardXP(100)
     else
       adventure = "#{@character.name} the #{@character.build} went forth and got #{getRandomAction} by #{monsterArticle(monster)}#{monster}. #{getRandomFail}"
     end
@@ -202,7 +202,7 @@ class Questing
       elsif (playerLevelDiff >= 5)
         experiences = bossLevel*50
       end
-      awardXP(channel, char.name, experiences)
+      awardXP(experiences, char)
       char.boss_damage = 0
       char.save
     end
@@ -212,10 +212,11 @@ class Questing
   def awardXP(experience, xpchar: nil)
     if (xpchar.nil?)
       xpchar = @character
-      xpchar.xp += experience
+    end
+    xpchar.xp += experience
     xpmsg = " #{xpchar.name} gains #{experience} xp!"
     
-    if (xpchar.xp >= getXPToNextLevel(@character.level) )
+    if (xpchar.xp >= Questing.getXPToNextLevel(@character.level) )
       xpchar.level += 1
       xpmsg += " #{xpchar.name} has reached level #{xpchar.level}!!"
       xpchar.xp = 0

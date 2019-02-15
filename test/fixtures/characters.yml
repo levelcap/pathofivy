@@ -1,13 +1,19 @@
-# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
 one:
-  name: MyString
-  build: MyString
+  name: test_thorsus
+  build: Good Guy
   level: 1
   description: MyText
+  trophies: 0
+  xp: 0
+  faction: birdo
+  channel: ivyteapot
 
 two:
-  name: MyString
-  build: MyString
-  level: 1
+  name: test_aphelion
+  build: Also Good Guy
+  level: 10
   description: MyText
+  trophies: 2
+  xp: 44
+  faction: doggo
+  channel: ivyteapot
