@@ -9,14 +9,19 @@ class BotCommand
     @running = false
     @channelName = ENV["CHANNEL_NAME"]
     @timer = Time.now
+    @chatters = Hash.new do |hash, key|
+      hash[key] = { :lastChat => Time.now, :character => Questing.new(key, +@channelName).character }
+    end
   end
 
   def start
     @running = true
     Thread.start do
+      talkToMe
+    end
+    Thread.start do
       print "Connected to chat!\n"
       print "#{BOTNAME} Joined ##{CHANNEL}"
-      talkToMe
       while (@running) do
         ready = IO.select([@socket])
         # IO.select comes back with an array that has the socket information at index 0 and nothing at all in the rest of the array
@@ -43,7 +48,8 @@ class BotCommand
       if (elapsedSeconds > 10)
         @timer = Time.now
         if (@running)
-          sendChannelMessage(@@talkingPoints.sample)
+          # Get a random person to harass
+          sendChannelMessage("#{@chatters.keys.sample} #{@@talkingPoints.sample}")
         end
       end
       sleep 10
@@ -53,11 +59,13 @@ class BotCommand
   def parseLine(line)
     # Regex to parse IRC nonsense into something useable
     match = line.match(/^:(.+)!(.+)PRIVMSG ##{@channelName} :(.+)$/)
+    pp match
     original_message = match && match[3]
     if original_message =~ /^/
       original_message.strip!
       message = original_message.downcase
       user = match[1]
+      pp(@chatters[user])
       handleCommands(user, message)
     end
   end
