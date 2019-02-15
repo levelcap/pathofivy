@@ -87,7 +87,7 @@ class Questing
     if (@channel.special_event_running == true)
       @character.last_quest_date = DateTime.now
       @character.save
-      return "#{@character.name}#{Event.getCurrentEventStep(channelName)}"
+      return "#{@character.name}#{Event.getCurrentEventStep(@channel.name)}"
     end
 
     ## Is there a boss active?
@@ -209,7 +209,7 @@ class Questing
   end
 
   # Add experience to active character and check for level up
-  def awardXP(experience, xpchar: nil)
+  def awardXP(experience, xpchar = nil)
     if (xpchar.nil?)
       xpchar = @character
     end
