@@ -24,9 +24,9 @@ class BotCommand
 
   def start
     @running = true
-    Thread.start do
-      talkToMe
-    end
+    # Thread.start do
+    #   talkToMe
+    # end
     Thread.start do
       print "Connected to chat!\n"
       print "#{BOTNAME} Joined ##{CHANNEL}"
@@ -85,7 +85,7 @@ class BotCommand
 
   def handleCommands(user, message)
     if (message.start_with? "!newpath")
-      questing = Questing.new(user, @channelName)
+      questing = Questing.new(user, +@channelName)
       adventure = questing.doQuest
       sendChannelMessage(adventure)
     elsif (message.start_with? "!otherthing")
