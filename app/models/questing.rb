@@ -146,7 +146,6 @@ class Questing
     else
       adventure = "#{@character.name} the #{@character.build} went forth and got #{getRandomAction} by #{monsterArticle(monster)}#{monster}. #{getRandomFail}"
     end
-    $timeOut = true 
     @character.save
     return adventure
   end
