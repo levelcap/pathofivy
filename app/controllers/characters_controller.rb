@@ -6,38 +6,27 @@ class CharactersController < ApplicationController
   # GET /characters.json
   def index
     @characters = Character.all
-  end # end index
+  end
 
   def nothing
     render plain: " "
-  end # end nothing
+  end
 
   def sheet
     channel = params[:channel].downcase
     name = params[:name]
     @character = Character.find_by(name: name, channel: channel)
-  end # end sheet
+  end
 
   def report
     channel = params[:channel].downcase
     name = params[:name]
-    @character = Character.find_by(name: name, channel: channel)
-    xpToNextLevel = getXPToNextLevel(@character.level)
-
-    if @character.trophies.nil?
-      @character.trophies = 0
+    character = Character.find_by(name: name, channel: channel)
+    if character.nil?
+      return render plain: "#{params[:name]}, you have not yet walked the Path of Ivy. Type !pathofivy to begin your journey."
     end
-    output = "#{@character.name} is a level #{@character.level} #{@character.build} with #{@character.trophies} boss "\
-    
-    if (@character.trophies === 1)
-      output += "trophy"
-    else
-      output += "trophies"
-    end
-    
-    output += " and has #{@character.xp}/#{xpToNextLevel} xp to the next level. "
-    render plain: output
-  end # end report
+    render plain: character.getReport
+  end
 
   def reportBoss
     boss = Boss.find_by(active: true)
@@ -49,265 +38,35 @@ class CharactersController < ApplicationController
   end
 
   def reportTopTrophies
-    channel = params[:channel].downcase
+    channelName = params[:channel].downcase
     num = params[:num].to_i
-    #num = 5
-    x = 0
-    y = 0
-    trophylist = []
-    output = ""
-   
-    # make ordered list of number of trophies that appear
-    topTrophies = Character.where(channel: channel).where("trophies > ?", 0).each do |tlist|
-     trophylist << tlist.trophies
-    end
-    
-    trophylist.sort! { |x,y| y <=> x} # use sort! to sort in place rather than create new array or it doesn't work
-
-    if trophylist.length > 0
-      trophylist = trophylist.uniq.first(num)
-    end
-    #output += "trophylist = #{trophylist} num = #{num} "
-    # identify all players having trophy counts matching elements of built-up array and form output string
-    topTrophies = Character.where(channel: channel).where("trophies > ?", 0)
-
-    if topTrophies.length <= 0
-      output = "Nobody has any trophies!"
-      render plain: output # investigate removing this early return
-      return
-    else
-      output += "The top Path of Ivy warriors: "
-      
-      # go through all characters and make arrays of characters that have that many trophies
-      trophylist.each do |tlist|
-        taggedChars = Character.where(channel: channel).where("trophies = ?", trophylist[x]).order(:name).sort # do we need .sort?
-        if tlist == 1
-          output += "With #{tlist} trophy: "
-        else
-          output += "With #{tlist} trophies: "
-        end
-
-        # go through compiled array and build a string
-        y = 0
-        while y < taggedChars.length
-          
-          if y === taggedChars.length-1
-            output += "#{taggedChars[y].name}. "
-          else
-            output += "#{taggedChars[y].name}, "
-          end
-          y += 1
-        end # end while
-        x += 1
-      end # end until
-
-    end # end if-else
-
-    render plain: output
-
-  end # end reportTopTrophies
+    render plain: Channel.find_by(name: channelName).getTrophies(num)
+  end
 
   def show
-    channelName = params[:channel].downcase
-    @channel = Channel.find_by(name: channelName)
-    if (@channel.nil?) 
-      @channel = Channel.new(
-        name: channelName,
-        special_event_running: false
-      )
-      @channel.save
-    end
-
-    @character = Character.find_by(name: params[:id], channel: channelName)
-    if @character.nil?
-      build = Questing.getRandomBuild
-      @character = Character.new(
-        name: params[:id],
-        build: build,
-        level: 1,
-        trophies: 0,
-        description: 'It worked',
-        channel: channelName,
-        xp: 0
-      )
-      @character.save
-      render plain: "#{@character.name} - a level 1 #{@character.build} - has started to walk the Path of Ivy! Type !pathofivy again to go on your first quest!" 
-      return
-    end
-    
-    # temporary compensation for no trophies field in case migration fucked up
-    if @character.trophies.nil?
-      @character.trophies = 0
-    end
-
-    if !@character.last_quest_date.nil?
-      minutesSinceLQ = minutesSince(@character.last_quest_date)
-      #minutesSinceLQ = 721 # for testing
-      if (minutesSinceLQ < 720 && $timeOut)
-        adventure = "#{@character.name}#{Questing.getRandomSleep}"
-        render plain: adventure
-        @character.save
-        return
-      end
-    end
-
-    ## Is there a special event running?
-    if (@channel.special_event_running == true)
-      render plain: "#{@character.name}#{Event.getCurrentEventStep(channelName)}"
-      @character.last_quest_date = DateTime.now
-      @character.save
-      return
-    end
-
-    ## Is there a boss active?
-    boss = Boss.find_by(active: true)
-    unless boss.nil?
-      ## Adds less swing to high level character damage, lets low level still deal satisfying damage
-      damage = [1, (@character.level + rand(-5..5))].max
-      health = boss.health - damage
-      boss.health = health;
-      if (health <= 0)
-        render plain: "#{boss.name} is bleeding all over the Path of Ivy. "\
-          "KAPOW #{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage, killing it dead! "\
-          "All fighters gain exp! Congratulations to #{@character.name} for landing the killing blow!"
-          @character.boss_damage += damage
-          awardtrophy = 1
-          @character.trophies += awardtrophy
-          @character.save            
-          boss.active = false
-          $timeOut = true
-        #awardBossLevels channel
-        awardBossXP(channelName, boss.level)
-      else
-        output =  "#{boss.name} is RUINING the Path of Ivy for everyone. "\
-          "KAPOW #{@character.name} #{Questing.getRandomAction} #{boss.name} for #{damage} damage!"
-        if (boss.health.to_f / boss.maxhealth.to_f) < 0.5
-          if (boss.health.to_f / boss.maxhealth.to_f) < 0.25
-            if (boss.health.to_f / boss.maxhealth.to_f) < 0.1
-              output += " #{boss.name} is on its last legs, if it even has legs! " # less than 10%
-            else
-              output += " #{boss.name} looks badly injured!" # less than 25%
-            end
-            
-          else
-            output += " #{boss.name} looks pretty hurt!" # less than 50%
-          end            
-        end
-
-        render plain: output
-        @character.boss_damage += damage
-        @character.save
-      end
-      boss.save
-      return
-    end # end unless
-
-    ## Lets go on a random adventure and get exp!
-    @character.last_quest_date = DateTime.now
-    monster = Questing.getRandomMonster
-    
-    ## First few levels are failure free!
-    if @character.level <= 3
-      success_coinflip = 3
-    else
-      success_coinflip = rand 3
-    end      
-
-    if success_coinflip > 0
-      #@character.level = @character.level + 1        
-      adventure = "#{@character.name} the #{@character.build} went forth and #{Questing.getRandomAction} "
-      if (monster[0].count "AEIOUaeiou") > 0
-        adventure += "an "
-      else
-        adventure += "a "
-      end
-      adventure += "#{monster}."         
-      adventure += awardXP(channelName, @character.name, 100)    # change this away from a magic number sometime
-      
-    else
-      adventure = "#{@character.name} the #{@character.build} went forth and got #{Questing.getRandomAction} by "
-      if (monster[0].count "AEIOUaeiou") > 0
-        adventure += "an "
-      else
-        adventure += "a "
-      end
-      adventure += "#{monster}. #{Questing.getRandomFail(@character)}"
-    end
-
-    render plain: adventure
-    $timeOut = true 
-    @character.save
-  end # end show
+    questing = Questing.new(params[:id], params[:channel])
+    render plain: questing.doQuest
+  end
 
   def faction
     channel = params[:channel].downcase
-    @character = Character.find_by(name: params[:name], channel: channel)
-    factionChoice = params[:faction] ? params[:faction].downcase : ""
-
-    if @character.nil?
-      render plain: "#{params[:name]}, you have not yet walked the Path of Ivy. Type !pathofivy to begin your journey."
-      return
+    faction = params[:faction] ? params[:faction].downcase : ""
+    character = Character.find_by(name: params[:name], channel: channel)
+    if character.nil?
+      return render plain: "#{params[:name]}, you have not yet walked the Path of Ivy. Type !pathofivy to begin your journey."
     end
-
-    if @character.level < 20
-      render plain: "#{@character.name}, you are not yet strong enough to join a faction. Continue your questing, tinymuscles."
-      return
-    end
-
-    unless @character.faction.nil?
-      if @character.faction === "birdo"
-        render plain: "#{@character.name}, you are already a member of the Megachurch of Wagglewings!"
-      else
-        render plain: "#{@character.name}, you have already a member of the Glorious Crusade of Streamdog!"
-      end
-      return
-    end
-
-    if factionChoice === "birdo"
-      @character.faction = "birdo"
-      @character.save
-      render plain: "Welcome to the Megachurch of Wagglewings, #{@character.name}!"
-      return
-    elsif factionChoice === "doggo"
-      @character.faction = "doggo"
-      @character.save
-      render plain: "Welcome to the Glorious Crusade of Streamdog, #{@character.name}!"
-    else
-      render plain: "#{factionChoice} is not a valid faction"
-    end
-
-  end # end faction
+    render plain: character.chooseFaction(faction)
+  end
 
   # spend levels to reroll your class
   def rerollClass
     channel = params[:channel].downcase
     name = params[:name]
-    levelreq = 2
-    @character = Character.find_by(name: name, channel: channel)
-    if @character.level < levelreq
-      render plain: "#{@character.name}, you aren't high enough level to reroll your class! (Level #{levelreq})"
-      return
-    else
-      @character.level -= 2
-      if @character.level === 0
-        @character.level = 1
-      end
-      @character.xp = 0
-      oldbuild = @character.build
-      if @character.name.downcase === "hellasweetcool" # *evil laughter*
-        newbuild = "Lovemuffin Archer"
-        @character.level += 2 # don't mess his levels up at least
-        render plain: "#{@character.name}, you thought and thought and thought about it, but eventually decided you loved being a #{oldbuild} so much you couldn't bear to switch away!"
-
-      else
-        newbuild = Questing.getRandomBuild
-        render plain: "#{@character.name}, after hours of extensive training, rigorous study, sharp focus, and copious amounts of tea drinking, "\
-      "you have transformed yourself from a #{oldbuild} to a #{newbuild}!!"
-      end
-      
-      @character.build = newbuild
-      @character.save
+    character = Character.find_by(name: name, channel: channel)
+    if character.nil?
+      return render plain: "#{params[:name]}, you have not yet walked the Path of Ivy. Type !pathofivy to begin your journey."
     end
+    render plain: character.rerollClass
   end
 
   # Add experience to character and check for level up - publicly accessible in case streamer wants to add xp to someone
@@ -315,88 +74,7 @@ class CharactersController < ApplicationController
     channel = params[:channel].downcase
     name = params[:name]
     experience = params[:experience]
-    @character = Character.find_by(name: name, channel: channel)    
-    #@character.xp += experience.to_i
-    # xpmsg = "#{experience} xp awarded to #{@character.name} !"
-    xpmsg = awardXP(channel, @character.name, experience.to_i)
-    #if (@character.xp >= getXPToNextLevel(@character.level) )
-     # @character.level += 1
-      #xpmsg += " #{@character.name} has reached level #{@character.level} !!"
-      #@character.xp = 0
-    #end
-    render plain: xpmsg
-    @character.save
-  end # end awardXPPublic
-
-
-  private
-  
-  def minutesSince(date)
-    return ((date - DateTime.now) / 60).abs.round
-  end # end minutesSince
-
-  # deprecated
-  def awardBossLevels(channel)
-    channelChars = Character.where(channel: channel).where("boss_damage > ?", 0).each do |char|
-      bonusLevels = 1
-      damage = char.boss_damage
-      if (damage > 100)
-        bonusLevels = 4
-      elsif (damage > 50)
-        bonusLevels = 3
-      elsif (damage > 10)
-        bonusLevels = 2
-      end
-  
-      char.level += bonusLevels
-      char.boss_damage = 0
-      char.save
-
-    end # end block
-  end # end awardBossLevels
-
-  # award XP to block of characters that participated in the boss fight
-  def awardBossXP(channel, bossLevel)
-    channelChars = Character.where(channel: channel).where("boss_damage > ?", 0).each do |char|
-    
-      playerLevelDiff = bossLevel - char.level
-      if (playerLevelDiff < -5)
-        experiences = bossLevel*2
-      elsif (playerLevelDiff < 5)
-        experiences = bossLevel*10
-      elsif (playerLevelDiff >= 5)
-        experiences = bossLevel*50
-      end
-
-    awardXP(channel, char.name, experiences)
-    char.boss_damage = 0
-    char.save
-    
-    end # end block
-  end # end awardBossXP
-
-  # Add experience to active character and check for level up
-  def awardXP(channel, name, experience)
-  #  @character = Character.find_by(name: name, channel: channel)    
-    @character.xp += experience
-
-    xpmsg = " #{@character.name} gains #{experience} xp!"
-    
-    #if (@character.xp >= (@character.level-1)*25 + 100)
-    if (@character.xp >= getXPToNextLevel(@character.level) )
-      @character.level += 1
-      xpmsg += " #{@character.name} has reached level #{@character.level}!!"
-      @character.xp = 0
-    end
-
-    @character.save
-      
-    xpmsg # implicit return
-    
-  end # end awardXP
-
-  def getXPToNextLevel(level)
-    (level-1)*25 + 100 # implicit return
+    questing = Questing.new(name, channel)
+    render plain: questing.awardXP(experience.to_i)
   end
-
-end # end Class
+end

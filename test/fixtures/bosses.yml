@@ -1,13 +1,19 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: MyString
-  description: MyString
-  health: 1
+  name: test_boss
+  description: angry test boss
+  health: 100
   active: false
+  level: 5
+  maxhealth: 100
+  channel: ivyteapot
 
 two:
-  name: MyString
-  description: MyString
-  health: 1
+  name: test_boss_second
+  description: happy test boss
+  health: 200
   active: false
+  level: 10
+  maxhealth: 300
+  channel: ivyteapot

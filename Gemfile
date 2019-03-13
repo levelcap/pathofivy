@@ -35,6 +35,9 @@ gem 'jbuilder', '~> 2.5'
 gem 'bootsnap', '>= 1.1.0', require: false
 gem "rack", ">= 2.0.6"
 gem "loofah", ">= 2.2.3"
+gem 'dotenv-rails', '>= 2.0.1'
+# For making HTTP requests
+gem 'httparty'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

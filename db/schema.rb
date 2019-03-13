@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_02_11_185401) do
+ActiveRecord::Schema.define(version: 2019_02_11_211547) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -49,6 +49,15 @@ ActiveRecord::Schema.define(version: 2019_02_11_185401) do
     t.integer "boss_damage", default: 0
     t.bigint "xp", default: 0
     t.integer "trophies"
+  end
+
+  create_table "logs", force: :cascade do |t|
+    t.integer "user_id"
+    t.string "user_name"
+    t.string "description"
+    t.string "type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "users", force: :cascade do |t|
